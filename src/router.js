@@ -54,7 +54,7 @@ export async function router(req, res) {
                 }
 
                 if (result.error) {
-                    return sendJson(res, 404, {errors: result.error});
+                    return sendJson(res, 400, {errors: result.error});
                 }
 
                 return sendJson(res, 200, result.data);
@@ -71,9 +71,11 @@ export async function router(req, res) {
                 return res.end();
             }
 
-            // nothing matched
-            return sendJson(res, 500, {error: "not_found"});
+            
         }
+
+        // nothing matched
+        return sendJson(res, 404, {error: "not_found"});
     } catch (error) {
         
         if (error.message === "invalid_json") {
