@@ -1,0 +1,4 @@
+
+> project-zephyrus@1.0.0 loadtest
+> autocannon -d 10 -c 50 http://localhost:3000/api/users
+
