@@ -1,5 +1,9 @@
 import { parseJsonBody } from "./utils/parse-body.js";
 import { listUsers, getUser, createUser, updateUser, deleteUser } from "./handlers/users.js";
+import { pipeline } from "node:stream/promises";
+import { Readable } from "node:stream";
+import { buildMovementsSeed } from "./data/movements-seed.js";
+import { createCsvTransform, CSV_HEADER } from "./streams/csv-transform.js";
 
 function sendJson(res, statusCode, payload) {
     res.writeHead(statusCode, {"content-type": "application/json"});
@@ -71,7 +75,23 @@ export async function router(req, res) {
                 return res.end();
             }
 
-            
+        }
+
+        // /api/movements
+        if (req.method === "GET" && pathname === "/api/movements/export") {
+            res.writeHead(200, {
+                "content-type": "text/csv",
+                "content-disposition": "attachment; filename=movements.csv",
+            });
+
+            res.write(CSV_HEADER);
+
+            const movements = buildMovementsSeed(500);
+            const source = Readable.from(movements, {objectMode: true});
+            const csv = createCsvTransform();
+
+            await pipeline(source, csv, res);
+            return;
         }
 
         // nothing matched

@@ -14,3 +14,18 @@ const server = createServer(async (req, res) => {
 server.listen(port, () => {
     console.log(`[server] API listening on http://localhost:${port}`);
 });
+
+function shutdown(signal) {
+    console.log(`[server] received ${signal}, closing gracefully (pid ${process.pid})`);
+    server.close(() => {
+        console.log(`[server] closed (pid ${process.pid})`);
+        process.exit(0);
+    });
+
+    setTimeout(() => process.exit(1), 10_000).unref();
+}
+
+process.on("SIGTERM", () => shutdown("SIGTERM"));
+process.on("SIGINT", () => shutdown("SIGINT"));
+
+export { server };
