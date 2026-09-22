@@ -15,5 +15,5 @@ const server = createServer((req, res) => {
 
 
 server.listen(port, () => {
-    console.log(`[server] API listenting on http//localhost:${port}`);
+    console.log(`[server] API listening on http//localhost:${port}`);
 });
