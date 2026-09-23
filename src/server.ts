@@ -12,10 +12,10 @@ const server = createServer(async (req, res) => {
 
 
 server.listen(port, () => {
-    console.log(`[server] API listening on http://localhost:${port}`);
+    console.log(`[server] API listening on http://localhost:${port} (pid ${process.pid})`);
 });
 
-function shutdown(signal) {
+function shutdown(signal: string): void {
     console.log(`[server] received ${signal}, closing gracefully (pid ${process.pid})`);
     server.close(() => {
         console.log(`[server] closed (pid ${process.pid})`);

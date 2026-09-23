@@ -2,14 +2,17 @@
   "name": "project-zephyrus",
   "version": "1.0.0",
   "description": "Backend for personal and shared finances for families and roommates",
-  "main": "src/server.js",
+  "main": "dist/server.js",
   "directories": {
     "doc": "docs"
   },
   "scripts": {
-    "start": "node --env-file=.env src/server.js",
-    "dev": "node --watch --env-file=.env src/server.js",
-    "cluster": "node --env-file=.env src/cluster.js",
+    "build": "tsc",
+    "start": "node --env-file=.env dist/server.js",
+    "start:cluster": "node --env-file=.env dist/cluster.js",
+    "dev": "tsx watch --env-file=.env src/server.ts",
+    "cluster": "tsx --env-file=.env src/cluster.js",
+    "typecheck": "tsc --noEmit",
     "loadtest": "autocannon -d 10 -c 50 http://localhost:3000/api/users",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -26,6 +29,9 @@
   },
   "homepage": "https://github.com/suspecttaco/project-zephyrus#readme",
   "devDependencies": {
-    "autocannon": "^8.0.0"
+    "@types/node": "^26.6.2",
+    "autocannon": "^2.0.1",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
   }
 }
