@@ -2,7 +2,7 @@
   "name": "project-zephyrus",
   "version": "1.0.0",
   "description": "Backend for personal and shared finances for families and roommates",
-  "main": "src/server.js",
+  "main": "dist/server.js",
   "directories": {
     "doc": "docs"
   },
