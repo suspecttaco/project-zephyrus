@@ -18,16 +18,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/suspecttaco/project-zephyrus.git"
+    "url": "git+https://github.com/DesarrolloBackend-2026-402/23122722.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "module",
   "bugs": {
-    "url": "https://github.com/suspecttaco/project-zephyrus/issues"
+    "url": "https://github.com/DesarrolloBackend-2026-402/23122722/issues"
   },
-  "homepage": "https://github.com/suspecttaco/project-zephyrus#readme",
+  "homepage": "https://github.com/DesarrolloBackend-2026-402/23122722#readme",
   "devDependencies": {
     "@types/node": "^26.6.2",
     "autocannon": "^2.0.1",

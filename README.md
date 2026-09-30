@@ -1,4 +1,4 @@
-# Project Zephyrus
+# Project Zephyrus (Official name will be determined later)
 
 Backend for personal and shared finances aimed at families and roommates: tracks credit/debit
 card and cash expenses, installment purchases, debts between people, and card cut-off date
