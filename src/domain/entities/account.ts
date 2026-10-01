@@ -63,16 +63,16 @@ export class Account {
 
     get availableCredit(): Money | null {
         if (this.type !== AccountType.CREDIT || !this.creditLimit) return null;
-        return this.creditLimit.substract(this.balance);
+        return this.creditLimit.subtract(this.balance);
     }
 
     applyMovement(type: MovementType, amount: Money): void {
         const isCredit = this.type === AccountType.CREDIT;
 
         if (type === MovementType.EXPENSE) {
-            this.balance = isCredit ? this.balance.add(amount) : this.balance.substract(amount);
+            this.balance = isCredit ? this.balance.add(amount) : this.balance.subtract(amount);
         } else if (type === MovementType.INCOME) {
-            this.balance = isCredit ? this.balance.substract(amount) : this.balance.add(amount);
+            this.balance = isCredit ? this.balance.subtract(amount) : this.balance.add(amount);
         }
 
         this.validateInvariants();

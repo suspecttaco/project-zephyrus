@@ -25,7 +25,7 @@ export class Money {
         return new Money(this.cents + other.cents);
     }
 
-    substract(other: Money): Money {
+    subtract(other: Money): Money {
         return new Money(this.cents - other.cents);
     }
 
