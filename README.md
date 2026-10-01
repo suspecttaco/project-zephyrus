@@ -43,12 +43,14 @@ src/
 - **Errors:** DomainError hierarchy (NegativeBalanceError, CreditLimitExceededError, etc.)
 - **Repository interfaces:** 10 abstract ports (IUserRepository, IAccountRepository, etc.)
 
-### Application layer (21 use cases)
+### Application layer (23 use cases)
 
 - **Auth:** RegisterUser, LoginUser
 - **Accounts:** CreateAccount, RegisterMovement, GetAccountSummary
-- **Groups:** CreateGroup, AddMemberToGroup, CreateSharedExpense, CalculateGroupBalance,
-  GetGroupLedger
+- **Groups:** CreateGroup, AddMemberToGroup, RemoveMemberFromGroup, UpdateGroup,
+  CreateSharedExpense, CalculateGroupBalance, GetGroupLedger
+- **Debt simplification:** SimplifyDebts
+- **Guards:** requireGroupAdmin (only group admins edit the group, remove members or create investments)
 - **Installments:** CreateInstallmentPurchase, PayInstallment
 - **Loans:** RegisterLoan, LiquidateLoan
 - **Shopping lists:** CreateShoppingList, MarkItemPurchased

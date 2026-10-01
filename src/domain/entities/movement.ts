@@ -1,6 +1,6 @@
 import { Money } from "../value-objects/money.js";
 import { MovementType, MovementCategory } from "../enums.js";
-import { InvalidMovementAmountError } from "../errors.js";
+import { DomainValidationError, InvalidMovementAmountError } from "../errors.js";
 
 export class Movement {
     readonly id: string;
@@ -45,10 +45,14 @@ export class Movement {
             throw new InvalidMovementAmountError("movement amount must be greater than zero");
         }
 
+        if (props.category != null && !Object.values(MovementCategory).includes(props.category)) {
+            throw new DomainValidationError(`invalid movement category ${props.category}`);
+        }
+
         return new Movement({
             id: props.id,
             accountId: props.accountId,
-            type: props.type ?? null,
+            type: props.type,
             amount: Money.fromCents(props.amountInCents),
             category: props.category ?? null,
             description: props.description,

@@ -1,6 +1,6 @@
 import {Money} from "../value-objects/money.js";
 import {AccountType, MovementType} from "../enums.js";
-import {CreditLimitExceededError, NegativeBalanceError} from "../errors.js";
+import {DomainValidationError, CreditLimitExceededError, NegativeBalanceError} from "../errors.js";
 
 export class Account {
     readonly id: string;
@@ -42,7 +42,15 @@ export class Account {
         cutOffDay?: number | null;
     }): Account {
         if (props.type === AccountType.CREDIT && (!props.creditLimitInCents || props.creditLimitInCents <= 0)) {
-            throw new Error("credit accounts require a positive creditLimit");
+            throw new DomainValidationError("credit accounts require a positive creditLimit");
+        }
+
+        if (props.type !== AccountType.CREDIT && props.creditLimitInCents) {
+            throw new DomainValidationError("only credit accounts can have a creditLimit");
+        }
+
+        if (props.cutOffDay != null && (!Number.isInteger(props.cutOffDay) || props.cutOffDay < 1 || props.cutOffDay > 31)) {
+            throw new DomainValidationError("cutOffDay must be an integer between 1 and 31");
         }
 
         return new Account({

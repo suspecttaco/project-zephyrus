@@ -1,5 +1,5 @@
 import { Money } from "../value-objects/money.js";
-import { ExpenseSplitMismatchError } from "../errors.js";
+import { InvalidSharedExpenseError, ExpenseSplitMismatchError } from "../errors.js";
 
 export interface ExpenseSplitEntry {
     userId: string;
@@ -42,6 +42,24 @@ export class SharedExpense {
         split: { userId: string; assignedAmountInCents: number }[];
     }): SharedExpense {
         const amount = Money.fromCents(props.amountInCents);
+
+        if (amount.isNegative() || amount.isZero()) {
+            throw new InvalidSharedExpenseError("expense amount must be greater than zero");
+        }
+
+        if (props.split.length === 0) {
+            throw new InvalidSharedExpenseError("expense must be split among at least one member");
+        }
+
+        if (props.split.some((s) => s.assignedAmountInCents < 0)) {
+            throw new InvalidSharedExpenseError("assigned amounts cannot be negative");
+        }
+
+        const userIds = props.split.map((s) => s.userId);
+        if (new Set(userIds).size !== userIds.length) {
+            throw new InvalidSharedExpenseError("a member cannot appear twice in a split");
+        }
+
         const split = props.split.map((s) => ({
             userId: s.userId,
             assignedAmount: Money.fromCents(s.assignedAmountInCents),

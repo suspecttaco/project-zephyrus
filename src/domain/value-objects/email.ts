@@ -1,3 +1,5 @@
+import { DomainValidationError } from "../errors.js";
+
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export class Email {
@@ -10,7 +12,7 @@ export class Email {
     static create(raw: string): Email {
         const normalized = raw.trim().toLowerCase();
         if (!EMAIL_REGEX.test(normalized)) {
-            throw new Error(`invalid email format: ${raw}`);
+            throw new DomainValidationError(`invalid email format: ${raw}`);
         }
 
         return new Email(normalized);
