@@ -32,6 +32,10 @@ export class Loan {
         id: string; groupId: string; lenderId: string; borrowerId: string;
         loanedAmountInCents: number; description: string;
     }): Loan {
+        if (props.lenderId === props.borrowerId) {
+            throw new InvalidLoanError("lender and borrower must be different users");
+        }
+
         const amount = Money.fromCents(props.loanedAmountInCents);
         if (amount.isNegative() || amount.isZero()) {
             throw new InvalidLoanError("loanedAmount must be greater than zero");
@@ -52,6 +56,9 @@ export class Loan {
     }
 
     settle(): void {
+        if (this.status == LoanStatus.PAID) {
+            throw new InvalidLoanError("loan is already settled")
+        }
         this.remaining = Money.zero();
         this.status = LoanStatus.PAID;
     }
