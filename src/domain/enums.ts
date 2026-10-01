@@ -20,7 +20,7 @@ export enum MovementCategory {
     RENT = "RENT",
     TRANSPORT = "TRANSPORT",
     UTILITIES = "UTILITIES",
-    ENTERTAIMENT = "ENTERTAIMENT",
+    ENTERTAINMENT = "ENTERTAINMENT",
     OTHER = "OTHER",
 }
 
@@ -37,5 +37,5 @@ export enum ShoppingListStatus {
 
 export enum InvestmentStatus {
     ACTIVE = "ACTIVE",
-    LIQUIDATED = "LOQUIDATED",
+    LIQUIDATED = "LIQUIDATED",
 }

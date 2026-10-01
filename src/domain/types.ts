@@ -101,7 +101,7 @@ export interface ShoppingListItem {
     name: string;
     quantity: number;
     estimatedPrice: number | null;
-    puchasedBy: string | null;
+    purchasedBy: string | null;
     createdAt: string;
 }
 
