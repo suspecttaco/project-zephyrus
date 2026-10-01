@@ -1,4 +1,5 @@
 import {GroupRole} from "../enums.js";
+import { UnauthorizedGroupActionError } from "../errors.js";
 
 export class GroupMembership {
     readonly groupId: string;
@@ -15,5 +16,11 @@ export class GroupMembership {
 
     isAdmin(): boolean {
         return this.role === GroupRole.GROUP_ADMIN;
+    }
+
+    assertAdmin(): void {
+        if (!this.isAdmin()) {
+            throw new UnauthorizedGroupActionError("only a group admin can perform this action");
+        }
     }
 }

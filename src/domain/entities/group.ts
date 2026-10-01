@@ -1,6 +1,8 @@
+import { DomainValidationError } from "../errors.js";
+
 export class Group {
     readonly id: string;
-    readonly name: string;
+    private groupName: string;
     readonly createdBy: string;
     readonly createdAt: Date;
 
@@ -11,9 +13,20 @@ export class Group {
         createdAt: Date;
     }) {
         this.id = props.id;
-        this.name = props.name;
+        this.groupName = props.name;
         this.createdBy = props.createdBy;
         this.createdAt = props.createdAt;
+    }
+
+    get name(): string {
+        return this.groupName;
+    }
+
+    rename(newName: string): void {
+        if (!newName.trim()) {
+            throw new DomainValidationError("group name is required");
+        }
+        this.groupName = newName.trim();
     }
 
     static create(props: {
@@ -22,7 +35,7 @@ export class Group {
         createdBy: string;
     }): Group {
         if (!props.name.trim()) {
-            throw new Error("group name is required");
+            throw new DomainValidationError("group name is required");
         }
 
         return new Group({ ...props, createdAt: new Date() });
