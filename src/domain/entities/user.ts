@@ -1,4 +1,5 @@
-import { Email } from "../value-objects/email.js"
+import { Email } from "../value-objects/email.js";
+import { DomainValidationError } from "../errors.js";
 
 export class User {
     readonly id: string;
@@ -17,7 +18,7 @@ export class User {
 
     static create(props: { id: string; email: string; passwordHash: string; name: string; }): User {
         if (!props.name.trim()) {
-            throw new Error("name is required");
+            throw new DomainValidationError("name is required");
         }
 
         return new User({

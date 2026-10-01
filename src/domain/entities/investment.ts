@@ -1,5 +1,6 @@
 import { Money } from "../value-objects/money.js";
 import { InvestmentStatus } from "../enums.js";
+import { DomainValidationError } from "../errors.js";
 
 export interface InvestmentContribution {
     userId: string;
@@ -49,7 +50,7 @@ export class Investment {
     }
 
     registerContribution(userId: string, amountInCents: number): void {
-        if (amountInCents <= 0) throw new Error("contribution amount must be greater than zero");
+        if (amountInCents <= 0) throw new DomainValidationError("contribution amount must be greater than zero");
         const amount = Money.fromCents(amountInCents);
         this.contributions.push({ userId, amount, date: new Date() });
         this.invested = this.invested.add(amount);

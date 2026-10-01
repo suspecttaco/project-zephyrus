@@ -1,4 +1,5 @@
 import { ShoppingListStatus } from "../enums.js";
+import { DomainValidationError } from "../errors.js";
 
 export class ShoppingList {
     readonly id: string;
@@ -21,7 +22,7 @@ export class ShoppingList {
     }
 
     static create(props: { id: string; groupId: string; name: string; createdBy: string }): ShoppingList {
-        if (!props.name.trim()) throw new Error("list name is required");
+        if (!props.name.trim()) throw new DomainValidationError("list name is required");
         return new ShoppingList({ ...props, status: ShoppingListStatus.OPEN, createdAt: new Date() });
     }
 
@@ -48,7 +49,7 @@ export class ShoppingListItem {
     readonly createdAt: Date;
 
     constructor(props: { id: string; listId: string; name: string; quantity: number; estimatedPrice?: number | null }) {
-        if (props.quantity <= 0) throw new Error("quantity must be > 0");
+        if (props.quantity <= 0) throw new DomainValidationError("quantity must be > 0");
         this.id = props.id;
         this.listId = props.listId;
         this.name = props.name;

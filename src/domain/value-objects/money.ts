@@ -1,9 +1,11 @@
+import { DomainValidationError } from "../errors.js";
+
 export class Money {
     private readonly cents: number;
 
     private constructor(cents: number) {
         if (!Number.isInteger(cents)) {
-            throw new Error("Money must be an integer amount in cents");
+            throw new DomainValidationError("Money must be an integer amount in cents");
         }
 
         this.cents = cents;
