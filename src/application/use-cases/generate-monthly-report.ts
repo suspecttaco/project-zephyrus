@@ -1,7 +1,7 @@
-import type { IMovementRepository } from "../../domain/repositories/movement-repository.js";
-import type { IAccountRepository } from "../../domain/repositories/account-repository.js";
-import type { ISharedExpenseRepository } from "../../domain/repositories/shared-expense-repository.js";
-import type { MovementCategory } from "../../domain/enums.js";
+import type {IMovementRepository} from "../../domain/repositories/movement-repository.js";
+import type {IAccountRepository} from "../../domain/repositories/account-repository.js";
+import type {ISharedExpenseRepository} from "../../domain/repositories/shared-expense-repository.js";
+import {MovementType} from "../../domain/enums.js";
 
 export interface MonthlyReport {
     month: string;
@@ -41,10 +41,10 @@ export class GenerateMonthlyReport {
         let totalIncomeInCents = 0;
         let totalExpensesInCents = 0;
         const byCategory: Record<string, number> = {};
-        const byAccount: Record<string, { accountId: string; name: string; totalInCents: number }> = {};
+        const byAccount = new Map<string, { accountId: string; name: string; totalInCents: number }>();
 
         for (const m of allMovements) {
-            if (m.type === "INCOME") {
+            if (m.type === MovementType.INCOME) {
                 totalIncomeInCents += m.amount.amountInCents;
             } else {
                 totalExpensesInCents += m.amount.amountInCents;
@@ -55,14 +55,22 @@ export class GenerateMonthlyReport {
 
             const account = accounts.find((a) => a.id === m.accountId);
             if (account) {
-                if (!byAccount[account.id]) {
-                    byAccount[account.id] = { accountId: account.id, name: account.name, totalInCents: 0 };
-                }
-                byAccount[account.id].totalInCents += m.amount.amountInCents;
+                const entry = byAccount.get(account.id) ??  { accountId: account.id, name: account.name, totalInCents: 0 };
+                entry.totalInCents += m.amount.amountInCents;
+                byAccount.set(account.id, entry);
             }
         }
 
-        const byPerson: Record<string, { userId: string; paidInCents: number; owedInCents: number }> = {};
+        const byPerson = new Map<string, { userId: string; paidInCents: number; owedInCents: number }>();
+        const personEntry = (userId: string) => {
+            let entry = byPerson.get(userId);
+            if (!entry) {
+                entry = { userId, paidInCents: 0, owedInCents: 0 };
+                byPerson.set(userId, entry);
+            }
+
+            return entry;
+        }
 
         if (input.groupId) {
             const expenses = await this.sharedExpenseRepository.findByGroup(input.groupId);
@@ -71,16 +79,10 @@ export class GenerateMonthlyReport {
             );
 
             for (const e of filteredExpenses) {
-                if (!byPerson[e.paidBy]) {
-                    byPerson[e.paidBy] = { userId: e.paidBy, paidInCents: 0, owedInCents: 0 };
-                }
-                byPerson[e.paidBy].paidInCents += e.amount.amountInCents;
+                personEntry(e.paidBy).paidInCents += e.amount.amountInCents;
 
                 for (const split of e.split) {
-                    if (!byPerson[split.userId]) {
-                        byPerson[split.userId] = { userId: split.userId, paidInCents: 0, owedInCents: 0 };
-                    }
-                    byPerson[split.userId].owedInCents += split.assignedAmount.amountInCents;
+                    personEntry(split.userId).owedInCents += split.assignedAmount.amountInCents;
                 }
             }
         }
@@ -90,8 +92,8 @@ export class GenerateMonthlyReport {
             totalIncomeInCents,
             totalExpensesInCents,
             byCategory,
-            byAccount,
-            byPerson,
+            byAccount: Object.fromEntries(byAccount),
+            byPerson: Object.fromEntries(byPerson),
         };
     }
 }

@@ -1,5 +1,5 @@
 import { Money } from "../value-objects/money.js";
-import { MovementCategory } from "../enums.js";
+import type { MovementCategory } from "../enums.js";
 import { InvalidBudgetPeriodError } from "../errors.js";
 
 export class Budget {

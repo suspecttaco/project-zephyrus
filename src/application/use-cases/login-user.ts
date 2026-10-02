@@ -7,7 +7,7 @@ export class LoginUser {
 
     async execute(input: { email: string; password: string }): Promise<User> {
         const user = await this.userRepository.findByEmail(input.email);
-        if (!user || user.passwordHash !== input.password) throw new InvalidCredentialsError("invalid credentials");
+        if (user?.passwordHash !== input.password) throw new InvalidCredentialsError("invalid credentials");
 
         return user;
     }

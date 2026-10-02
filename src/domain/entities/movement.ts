@@ -1,5 +1,6 @@
 import { Money } from "../value-objects/money.js";
-import { MovementType, MovementCategory } from "../enums.js";
+import type { MovementType } from "../enums.js";
+import { MovementCategory } from "../enums.js";
 import { DomainValidationError, InvalidMovementAmountError } from "../errors.js";
 
 export class Movement {
