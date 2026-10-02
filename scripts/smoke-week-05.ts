@@ -14,7 +14,10 @@ import { Movement } from "../src/domain/entities/movement.js";
 import { AccountType, MovementCategory, MovementType } from "../src/domain/enums.js";
 import { GenerateMonthlyReport } from "../src/application/use-cases/generate-monthly-report.js";
 import { Money } from "../src/domain/value-objects/money.js";
-import {ExpenseSplitMismatchError, InvalidSharedExpenseError, InvalidLoanError, UnauthorizedGroupActionError, DomainValidationError, NegativeBalanceError, InvalidTransferError, NotFoundError, CreditLimitExceededError} from "../src/domain/errors.js";
+import { InvalidInstallmentPurchaseError, ExpenseSplitMismatchError, InvalidSharedExpenseError, InvalidLoanError, UnauthorizedGroupActionError, DomainValidationError, NegativeBalanceError, InvalidTransferError, NotFoundError, CreditLimitExceededError} from "../src/domain/errors.js";
+import { CreateInstallmentPurchase } from "../src/application/use-cases/create-installment-purchase.js";
+import { PayInstallment } from "../src/application/use-cases/pay-installment.js";
+import { AdvanceInstallments } from "../src/application/use-cases/advance-installments.js";
 
 async function expectThrows(label: string, fn: () => Promise<unknown>, errorClass: new (...a: any[]) => Error) {
     try {
@@ -68,6 +71,9 @@ async function main() {
             return [...sharedExpenses.store.values()].filter((e: any) => e.groupId === groupId);
         }};
     const loans = { ...inMemoryRepo<any>(), async findByGroup() { return []; } };
+    const installmentPurchases = { ...inMemoryRepo<any>(), async findByAccount(accountId: string) {
+            return [...installmentPurchases.store.values()].filter((p: any) => p.accountId === accountId);
+        }};
     const investments = inMemoryRepo<any>();
 
     const ana = await new RegisterUser(users as any).execute({ email: "ana@test.com", password: "x", name: "Ana" });
@@ -218,6 +224,50 @@ async function main() {
     assertEqual("reporte: categoria OTHER (la cena sin categoria)", report.byCategory.OTHER, 1_200_00);
     assertEqual("reporte: gasto en la tarjeta", report.byAccount[account.id]?.totalInCents, 1_200_00);
     assertEqual("reporte: gasto en el debito", report.byAccount[debit.id]?.totalInCents, 2_000_00);
+
+    // --- Compras a plazos (MSI): pagar la mensualidad, adelantar y atomicidad ---
+    const payInstallment = new PayInstallment(installmentPurchases as any, movements as any, accounts as any);
+    const advanceInstallments = new AdvanceInstallments(installmentPurchases as any, movements as any, accounts as any);
+    const createPurchase = new CreateInstallmentPurchase(installmentPurchases as any);
+
+    // Tablet: 1,200 a 12 mensualidades de 100 en la tarjeta Nu (limite 5,000, deuda actual 0)
+    const tablet = await createPurchase.execute({
+        accountId: account.id, description: "Tablet", totalAmountInCents: 1_200_00, totalInstallments: 12, monthlyPaymentInCents: 100_00,
+    });
+    await payInstallment.execute({ purchaseId: tablet.id });
+    assertEqual("msi: pagar la mensualidad avanza el contador", tablet.remainingInstallments, 11);
+    assertEqual("msi: la mensualidad se carga a la tarjeta", await balanceOf(account.id), 100_00);
+
+    // Adelantar 3: se quitan las ultimas 3; el contador del mes no cambia
+    await advanceInstallments.execute({ purchaseId: tablet.id, count: 3 });
+    assertEqual("msi: adelantar descuenta desde el final del plan", tablet.remainingInstallments, 8);
+    assertEqual("msi: adelantadas registradas", tablet.prepaidInstallments, 3);
+    assertEqual("msi: la deuda restante baja", tablet.remainingDebt.amountInCents, 800_00);
+    assertEqual("msi: adelantar cuesta 3 mensualidades", await balanceOf(account.id), 400_00);
+
+    await expectThrows("msi: no se puede adelantar mas de lo que falta", () =>
+        advanceInstallments.execute({ purchaseId: tablet.id, count: 9 }), InvalidInstallmentPurchaseError);
+    await expectThrows("msi: adelantar 0 mensualidades", () =>
+        advanceInstallments.execute({ purchaseId: tablet.id, count: 0 }), InvalidInstallmentPurchaseError);
+    await expectThrows("msi: adelantar una cantidad no entera", () =>
+        advanceInstallments.execute({ purchaseId: tablet.id, count: 1.5 }), InvalidInstallmentPurchaseError);
+    assertEqual("msi: un intento invalido no toca la tarjeta", await balanceOf(account.id), 400_00);
+
+    // Compra grande: adelantar 5 (5,000) rebasa el limite -> nada cambia
+    const laptop = await createPurchase.execute({
+        accountId: account.id, description: "Laptop", totalAmountInCents: 10_000_00, totalInstallments: 10, monthlyPaymentInCents: 1_000_00,
+    });
+    await expectThrows("msi: adelantar sobre el limite de credito", () =>
+        advanceInstallments.execute({ purchaseId: laptop.id, count: 5 }), CreditLimitExceededError);
+    assertEqual("msi: fallo por limite deja la compra intacta", laptop.remainingInstallments, 10);
+    assertEqual("msi: fallo por limite deja la tarjeta intacta", await balanceOf(account.id), 400_00);
+
+    // Adelantar todo lo restante liquida la compra
+    await advanceInstallments.execute({ purchaseId: tablet.id, count: 8 });
+    assertEqual("msi: adelantar todo deja 0 pendientes", tablet.remainingInstallments, 0);
+    assertEqual("msi: la compra liquidada se desactiva", tablet.isActive, false);
+    await expectThrows("msi: no se paga una compra liquidada", () =>
+        payInstallment.execute({ purchaseId: tablet.id }), InvalidInstallmentPurchaseError);
 }
 
 main().catch((err) => {

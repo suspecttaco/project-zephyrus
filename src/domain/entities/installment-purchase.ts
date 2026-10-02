@@ -8,6 +8,7 @@ export class InstallmentPurchase {
     readonly totalAmount: Money;
     readonly totalInstallments: number;
     private paidInstallments: number;
+    private advancedInstallments: number;
     readonly monthlyPayment: Money;
     private active: boolean;
     readonly startDate: Date;
@@ -15,7 +16,7 @@ export class InstallmentPurchase {
 
     private constructor(props: {
         id: string; accountId: string; description: string; totalAmount: Money;
-        totalInstallments: number; paidInstallments: number; monthlyPayment: Money;
+        totalInstallments: number; paidInstallments: number; advancedInstallments: number; monthlyPayment: Money;
         active: boolean; startDate: Date; createdAt: Date;
     }) {
         this.id = props.id;
@@ -24,6 +25,7 @@ export class InstallmentPurchase {
         this.totalAmount = props.totalAmount;
         this.totalInstallments = props.totalInstallments;
         this.paidInstallments = props.paidInstallments;
+        this.advancedInstallments = props.advancedInstallments;
         this.monthlyPayment = props.monthlyPayment;
         this.active = props.active;
         this.startDate = props.startDate;
@@ -41,6 +43,7 @@ export class InstallmentPurchase {
             totalAmount: Money.fromCents(props.totalAmountInCents),
             totalInstallments: props.totalInstallments,
             paidInstallments: 0,
+            advancedInstallments: 0,
             monthlyPayment: Money.fromCents(props.monthlyPaymentInCents),
             active: true,
             startDate: new Date(),
@@ -49,7 +52,7 @@ export class InstallmentPurchase {
     }
 
     get remainingInstallments(): number {
-        return this.totalInstallments - this.paidInstallments;
+        return this.totalInstallments - this.paidInstallments - this.advancedInstallments;
     }
 
     get remainingDebt(): Money {
@@ -60,12 +63,41 @@ export class InstallmentPurchase {
         return this.active;
     }
 
-    payInstallment(): void {
+    get prepaidInstallments(): number {
+        return this.advancedInstallments;
+    }
+
+    assertCanPayInstallment(): void {
         if (!this.active) throw new InvalidInstallmentPurchaseError("purchase is not active");
-        if (this.paidInstallments >= this.totalInstallments) {
+        if (this.remainingInstallments <= 0) {
             throw new InvalidInstallmentPurchaseError("all installments are already paid");
         }
+    }
+
+    // Paga la mensualidad del mes: avanza el contador "X/N"
+    payInstallment(): void {
+        this.assertCanPayInstallment();
         this.paidInstallments += 1;
-        if (this.paidInstallments === this.totalInstallments) this.active = false;
+        if (this.remainingInstallments === 0) this.active = false;
+    }
+
+    assertCanAdvance(count: number): void {
+        if (!this.active) throw new InvalidInstallmentPurchaseError("purchase is not active");
+        if (!Number.isInteger(count) || count < 1) {
+            throw new InvalidInstallmentPurchaseError("installments to advance must be a positive integer");
+        }
+        if (count > this.remainingInstallments) {
+            throw new InvalidInstallmentPurchaseError(
+                `cannot advance ${String(count)} installments: only ${String(this.remainingInstallments)} remaining`,
+            );
+        }
+    }
+
+    // Adelanta mensualidades: se quitan las ULTIMAS del plan.
+    // El pago del mes y el calendario proximo no cambian el plan solo termina antes
+    advanceInstallments(count: number): void {
+        this.assertCanAdvance(count);
+        this.advancedInstallments += count;
+        if (this.remainingInstallments === 0) this.active = false;
     }
 }

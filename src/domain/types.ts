@@ -78,6 +78,7 @@ export interface InstallmentPurchase {
     totalAmount: number;
     totalInstallments: number;
     paidInstallments: number;
+    advancedInstallments: number;
     monthlyPayment: number;
     active: boolean;
     startDate: string;
