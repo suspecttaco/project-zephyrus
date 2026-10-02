@@ -11,8 +11,10 @@ import { RemoveMemberFromGroup } from "../src/application/use-cases/remove-membe
 import { RegisterLoan } from "../src/application/use-cases/register-loan.js";
 import { LiquidateLoan } from "../src/application/use-cases/liquidate-loan.js";
 import { Movement } from "../src/domain/entities/movement.js";
-import { AccountType, MovementType } from "../src/domain/enums.js";
-import {ExpenseSplitMismatchError, InvalidSharedExpenseError, InvalidLoanError, UnauthorizedGroupActionError, DomainValidationError, NegativeBalanceError,} from "../src/domain/errors.js";
+import { AccountType, MovementCategory, MovementType } from "../src/domain/enums.js";
+import { GenerateMonthlyReport } from "../src/application/use-cases/generate-monthly-report.js";
+import { Money } from "../src/domain/value-objects/money.js";
+import {ExpenseSplitMismatchError, InvalidSharedExpenseError, InvalidLoanError, UnauthorizedGroupActionError, DomainValidationError, NegativeBalanceError, InvalidTransferError, NotFoundError, CreditLimitExceededError} from "../src/domain/errors.js";
 
 async function expectThrows(label: string, fn: () => Promise<unknown>, errorClass: new (...a: any[]) => Error) {
     try {
@@ -22,6 +24,13 @@ async function expectThrows(label: string, fn: () => Promise<unknown>, errorClas
         throw new Error(`FAIL - ${label}: threw ${(err as Error).name}, expected ${errorClass.name}`);
     }
     throw new Error(`FAIL - ${label}: did not throw`);
+}
+
+function assertEqual(label: string, actual: unknown, expected: unknown) {
+    if (actual !== expected) {
+        throw new Error(`FAIL - ${label}: got ${String(actual)}, expected ${String(expected)}`);
+    }
+    console.log(`ok   - ${label}`);
 }
 
 // testing en memoria
@@ -38,8 +47,14 @@ async function main() {
     const users = { ...inMemoryRepo<any>(), async findByEmail(email: string) {
             return [...users.store.values()].find((u: any) => u.email.toString() === email) ?? null;
         }};
-    const accounts = inMemoryRepo<any>();
-    const movements = { ...inMemoryRepo<any>(), async findByAccount() { return []; } };
+    const accounts = { ...inMemoryRepo<any>(), async findByUser(userId: string) {
+            return [...accounts.store.values()].filter((a: any) => a.userId === userId);
+        }};
+    const movements = { ...inMemoryRepo<any>(), async findByAccount(accountId: string) {
+            return [...movements.store.values()].filter(
+                (m: any) => m.accountId === accountId || m.destinationAccountId === accountId,
+            );
+        }};
     const groups = inMemoryRepo<any>();
     const memberships = { ...inMemoryRepo<any>(),
         async find(groupId: string, userId: string) {
@@ -131,6 +146,78 @@ async function main() {
     await new UpdateGroup(groups as any, memberships as any).execute({ groupId: group.id, actorId: ana.id, name: "Depa 2" });
     await new RemoveMemberFromGroup(memberships as any).execute({ groupId: group.id, actorId: ana.id, userId: beto.id });
     console.log("ok   - inv9: admin crea inversion, edita grupo y expulsa");
+
+    // --- Transferencias entre cuentas propias y reporte mensual ---
+    const registerMovement = new RegisterMovement(movements as any, accounts as any);
+    const balanceOf = async (id: string): Promise<number> => (await accounts.findById(id)).currentBalance.amountInCents;
+
+    const debit = await new CreateAccount(accounts as any).execute({ userId: ana.id, name: "Debito", type: AccountType.DEBIT });
+    const betoDebit = await new CreateAccount(accounts as any).execute({ userId: beto.id, name: "Beto debito", type: AccountType.DEBIT });
+
+    await registerMovement.execute({ accountId: debit.id, type: MovementType.INCOME, amountInCents: 10_000_00, description: "Quincena" });
+    await registerMovement.execute({
+        accountId: debit.id, type: MovementType.EXPENSE, amountInCents: 2_000_00,
+        category: MovementCategory.GROCERIES, description: "Despensa",
+    });
+
+    // Pagar la tarjeta Nu (debe 1,200) desde el debito: sale del debito y baja la deuda
+    await registerMovement.execute({
+        accountId: debit.id, destinationAccountId: account.id, type: MovementType.TRANSFER,
+        amountInCents: 1_200_00, description: "Pago tarjeta Nu",
+    });
+    assertEqual("transfer: baja el saldo del debito", await balanceOf(debit.id), 6_800_00);
+    assertEqual("transfer: baja la deuda de la tarjeta", await balanceOf(account.id), 0);
+
+    await expectThrows("transfer: sin cuenta destino", () =>
+            registerMovement.execute({ accountId: debit.id, type: MovementType.TRANSFER, amountInCents: 10_00, description: "x" }),
+        InvalidTransferError);
+    await expectThrows("transfer: origen y destino iguales", () =>
+        registerMovement.execute({
+            accountId: debit.id, destinationAccountId: debit.id, type: MovementType.TRANSFER, amountInCents: 10_00, description: "x",
+        }), InvalidTransferError);
+    await expectThrows("transfer: no admite categoria", () =>
+        registerMovement.execute({
+            accountId: debit.id, destinationAccountId: account.id, type: MovementType.TRANSFER, amountInCents: 10_00,
+            category: MovementCategory.OTHER, description: "x",
+        }), InvalidTransferError);
+    await expectThrows("transfer: un gasto no puede tener cuenta destino", () =>
+        registerMovement.execute({
+            accountId: debit.id, destinationAccountId: account.id, type: MovementType.EXPENSE, amountInCents: 10_00, description: "x",
+        }), InvalidTransferError);
+    await expectThrows("transfer: solo entre cuentas del mismo usuario", () =>
+        registerMovement.execute({
+            accountId: debit.id, destinationAccountId: betoDebit.id, type: MovementType.TRANSFER, amountInCents: 10_00, description: "x",
+        }), InvalidTransferError);
+    await expectThrows("transfer: cuenta destino inexistente", () =>
+        registerMovement.execute({
+            accountId: debit.id, destinationAccountId: "no-existe", type: MovementType.TRANSFER, amountInCents: 10_00, description: "x",
+        }), NotFoundError);
+    await expectThrows("transfer: saldo insuficiente en el origen", () =>
+        registerMovement.execute({
+            accountId: debit.id, destinationAccountId: account.id, type: MovementType.TRANSFER, amountInCents: 100_000_00, description: "x",
+        }), NegativeBalanceError);
+    await expectThrows("transfer: avance de efectivo sobre el limite de credito", () =>
+        registerMovement.execute({
+            accountId: account.id, destinationAccountId: debit.id, type: MovementType.TRANSFER, amountInCents: 6_000_00, description: "x",
+        }), CreditLimitExceededError);
+    assertEqual("transfer fallida: el debito queda intacto", await balanceOf(debit.id), 6_800_00);
+    assertEqual("transfer fallida: la tarjeta queda intacta", await balanceOf(account.id), 0);
+    await expectThrows("account: applyMovement no acepta TRANSFER", async () => {
+        const stored = await accounts.findById(debit.id);
+        stored.applyMovement(MovementType.TRANSFER, Money.fromCents(1));
+    }, InvalidTransferError);
+
+    // Reporte: la transferencia no cuenta ni como ingreso ni como gasto
+    const now = new Date();
+    const month = `${String(now.getFullYear())}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+    const report = await new GenerateMonthlyReport(movements as any, accounts as any, sharedExpenses as any)
+        .execute({ userId: ana.id, month });
+    assertEqual("reporte: ingresos", report.totalIncomeInCents, 10_000_00);
+    assertEqual("reporte: gastos (sin la transferencia)", report.totalExpensesInCents, 3_200_00);
+    assertEqual("reporte: categoria GROCERIES", report.byCategory.GROCERIES, 2_000_00);
+    assertEqual("reporte: categoria OTHER (la cena sin categoria)", report.byCategory.OTHER, 1_200_00);
+    assertEqual("reporte: gasto en la tarjeta", report.byAccount[account.id]?.totalInCents, 1_200_00);
+    assertEqual("reporte: gasto en el debito", report.byAccount[debit.id]?.totalInCents, 2_000_00);
 }
 
 main().catch((err) => {

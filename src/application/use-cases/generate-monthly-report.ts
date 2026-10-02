@@ -44,18 +44,21 @@ export class GenerateMonthlyReport {
         const byAccount = new Map<string, { accountId: string; name: string; totalInCents: number }>();
 
         for (const m of allMovements) {
+            if (m.type === MovementType.TRANSFER) continue;
+
             if (m.type === MovementType.INCOME) {
                 totalIncomeInCents += m.amount.amountInCents;
-            } else {
-                totalExpensesInCents += m.amount.amountInCents;
+                continue;
             }
+
+            totalExpensesInCents += m.amount.amountInCents;
 
             const cat = m.category ?? "OTHER";
             byCategory[cat] = (byCategory[cat] ?? 0) + m.amount.amountInCents;
 
             const account = accounts.find((a) => a.id === m.accountId);
             if (account) {
-                const entry = byAccount.get(account.id) ??  { accountId: account.id, name: account.name, totalInCents: 0 };
+                const entry = byAccount.get(account.id) ?? { accountId: account.id, name: account.name, totalInCents: 0 };
                 entry.totalInCents += m.amount.amountInCents;
                 byAccount.set(account.id, entry);
             }
