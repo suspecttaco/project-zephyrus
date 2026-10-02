@@ -31,6 +31,7 @@ export interface Account {
 export interface Movement {
     id: string;
     accountId: string;
+    destinationAccountId: string | null;
     type: MovementType;
     amount: number;
     category: MovementCategory | null;

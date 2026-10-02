@@ -1,6 +1,6 @@
 import {Money} from "../value-objects/money.js";
 import {AccountType, MovementType} from "../enums.js";
-import {DomainValidationError, CreditLimitExceededError, NegativeBalanceError} from "../errors.js";
+import {DomainValidationError, CreditLimitExceededError, InvalidTransferError, NegativeBalanceError} from "../errors.js";
 
 export class Account {
     readonly id: string;
@@ -30,7 +30,7 @@ export class Account {
         this.creditLimit = props.creditLimit;
         this.cutOffDay = props.cutOffDay;
         this.createdAt = props.createdAt;
-        this.validateInvariants();
+        this.assertValidBalance(props.balance);
     }
 
     static create(props: {
@@ -75,23 +75,45 @@ export class Account {
     }
 
     applyMovement(type: MovementType, amount: Money): void {
-        const isCredit = this.type === AccountType.CREDIT;
-
-        if (type === MovementType.EXPENSE) {
-            this.balance = isCredit ? this.balance.add(amount) : this.balance.subtract(amount);
-        } else if (type === MovementType.INCOME) {
-            this.balance = isCredit ? this.balance.subtract(amount) : this.balance.add(amount);
+        switch (type) {
+            case MovementType.EXPENSE:
+                this.withdraw(amount);
+                break;
+            case MovementType.INCOME:
+                this.deposit(amount);
+                break;
+            case MovementType.TRANSFER:
+                throw new InvalidTransferError("a transfer needs a direction: use transferOut or transferIn");
         }
-
-        this.validateInvariants();
     }
 
-    private validateInvariants(): void {
-        if (this.type !== AccountType.CREDIT && this.balance.isNegative()) {
+    transferOut(amount: Money): void {
+        this.withdraw(amount);
+    }
+
+    transferIn(amount: Money): void {
+        this.deposit(amount);
+    }
+
+    private withdraw(amount: Money): void {
+        this.setBalance(this.type === AccountType.CREDIT ? this.balance.add(amount) : this.balance.subtract(amount));
+    }
+
+    private deposit(amount: Money): void {
+        this.setBalance(this.type === AccountType.CREDIT ? this.balance.subtract(amount) : this.balance.add(amount));
+    }
+
+    private setBalance(next: Money): void {
+        this.assertValidBalance(next);
+        this.balance = next;
+    }
+
+    private assertValidBalance(balance: Money): void {
+        if (this.type !== AccountType.CREDIT && balance.isNegative()) {
             throw new NegativeBalanceError(`account ${this.id} cannot have a negative balance`);
         }
 
-        if (this.type === AccountType.CREDIT && this.creditLimit &&  this.balance.isGreaterThan(this.creditLimit)) {
+        if (this.type === AccountType.CREDIT && this.creditLimit && balance.isGreaterThan(this.creditLimit)) {
             throw new CreditLimitExceededError(`account ${this.id} exceeds its credit limit`);
         }
     }
