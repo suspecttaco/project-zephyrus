@@ -10,7 +10,12 @@ export class RegisterUser {
         const existing = await this.userRepository.findByEmail(input.email);
         if (existing) throw new EmailAlreadyRegisteredError("email already registered");
 
-        const user = User.create({ id: randomUUID(), email: input.email, passwordHash: input.password, name: input.name });
+        const user = User.create({
+            id: randomUUID(),
+            email: input.email,
+            passwordHash: input.password,
+            name: input.name,
+        });
         await this.userRepository.save(user);
         return user;
     }

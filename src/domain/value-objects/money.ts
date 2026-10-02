@@ -52,6 +52,6 @@ export class Money {
     }
 
     toString(): string {
-        return `$${(this.cents / 100).toFixed(2)} MXN`
+        return `$${(this.cents / 100).toFixed(2)} MXN`;
     }
 }

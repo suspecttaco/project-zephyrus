@@ -1,4 +1,4 @@
-import {GroupRole} from "../enums.js";
+import { GroupRole } from "../enums.js";
 import { UnauthorizedGroupActionError } from "../errors.js";
 
 export class GroupMembership {
@@ -7,7 +7,7 @@ export class GroupMembership {
     readonly role: GroupRole;
     readonly joinedAt: Date;
 
-    constructor(props: {groupId: string; userId: string; role: GroupRole }) {
+    constructor(props: { groupId: string; userId: string; role: GroupRole }) {
         this.groupId = props.groupId;
         this.userId = props.userId;
         this.role = props.role;

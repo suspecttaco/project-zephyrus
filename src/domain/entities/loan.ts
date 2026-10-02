@@ -14,8 +14,15 @@ export class Loan {
     private status: LoanStatus;
 
     private constructor(props: {
-        id: string; groupId: string; lenderId: string; borrowerId: string;
-        loanedAmount: Money; remaining: Money; description: string; date: Date; status: LoanStatus;
+        id: string;
+        groupId: string;
+        lenderId: string;
+        borrowerId: string;
+        loanedAmount: Money;
+        remaining: Money;
+        description: string;
+        date: Date;
+        status: LoanStatus;
     }) {
         this.id = props.id;
         this.groupId = props.groupId;
@@ -29,8 +36,12 @@ export class Loan {
     }
 
     static create(props: {
-        id: string; groupId: string; lenderId: string; borrowerId: string;
-        loanedAmountInCents: number; description: string;
+        id: string;
+        groupId: string;
+        lenderId: string;
+        borrowerId: string;
+        loanedAmountInCents: number;
+        description: string;
     }): Loan {
         if (props.lenderId === props.borrowerId) {
             throw new InvalidLoanError("lender and borrower must be different users");
@@ -41,9 +52,15 @@ export class Loan {
             throw new InvalidLoanError("loanedAmount must be greater than zero");
         }
         return new Loan({
-            id: props.id, groupId: props.groupId, lenderId: props.lenderId, borrowerId: props.borrowerId,
-            loanedAmount: amount, remaining: amount, description: props.description,
-            date: new Date(), status: LoanStatus.ACTIVE,
+            id: props.id,
+            groupId: props.groupId,
+            lenderId: props.lenderId,
+            borrowerId: props.borrowerId,
+            loanedAmount: amount,
+            remaining: amount,
+            description: props.description,
+            date: new Date(),
+            status: LoanStatus.ACTIVE,
         });
     }
 
@@ -57,7 +74,7 @@ export class Loan {
 
     settle(): void {
         if (this.status == LoanStatus.PAID) {
-            throw new InvalidLoanError("loan is already settled")
+            throw new InvalidLoanError("loan is already settled");
         }
         this.remaining = Money.zero();
         this.status = LoanStatus.PAID;

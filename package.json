@@ -14,7 +14,12 @@
     "cluster": "tsx --env-file=.env src/cluster.js",
     "typecheck": "tsc --noEmit",
     "loadtest": "autocannon -d 10 -c 50 http://localhost:3000/api/users",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "prepare": "husky"
   },
   "repository": {
     "type": "git",
@@ -29,9 +34,19 @@
   },
   "homepage": "https://github.com/DesarrolloBackend-2026-402/23122722#readme",
   "devDependencies": {
+    "@commitlint/cli": "^21.2.3",
+    "@commitlint/config-conventional": "^21.2.3",
+    "@eslint/js": "^10.0.1",
     "@types/node": "^26.6.2",
     "autocannon": "^2.0.1",
+    "eslint": "^10.11.0",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^17.13.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.6.0",
+    "prettier": "^3.9.9",
     "tsx": "^4.23.15",
-    "typescript": "^7.0.2"
+    "typescript": "~6.0",
+    "typescript-eslint": "^8.71.0"
   }
 }

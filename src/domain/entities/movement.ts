@@ -1,10 +1,11 @@
 import { Money } from "../value-objects/money.js";
-import { MovementType, MovementCategory } from "../enums.js";
-import { DomainValidationError, InvalidMovementAmountError } from "../errors.js";
+import { MovementCategory, MovementType } from "../enums.js";
+import { DomainValidationError, InvalidMovementAmountError, InvalidTransferError } from "../errors.js";
 
 export class Movement {
     readonly id: string;
     readonly accountId: string;
+    readonly destinationAccountId: string | null; // solo TRANSFER: cuenta que recibe el dinero
     readonly type: MovementType;
     readonly amount: Money;
     readonly category: MovementCategory | null;
@@ -13,8 +14,9 @@ export class Movement {
     readonly createdAt: Date;
 
     private constructor(props: {
-        id: string,
+        id: string;
         accountId: string;
+        destinationAccountId: string | null;
         type: MovementType;
         amount: Money;
         category: MovementCategory | null;
@@ -24,6 +26,7 @@ export class Movement {
     }) {
         this.id = props.id;
         this.accountId = props.accountId;
+        this.destinationAccountId = props.destinationAccountId;
         this.type = props.type;
         this.amount = props.amount;
         this.category = props.category;
@@ -35,6 +38,7 @@ export class Movement {
     static create(props: {
         id: string;
         accountId: string;
+        destinationAccountId?: string | null;
         type: MovementType;
         amountInCents: number;
         category?: MovementCategory | null;
@@ -49,9 +53,25 @@ export class Movement {
             throw new DomainValidationError(`invalid movement category ${props.category}`);
         }
 
+        const destinationAccountId = props.destinationAccountId ?? null;
+        if (props.type === MovementType.TRANSFER) {
+            if (destinationAccountId === null) {
+                throw new InvalidTransferError("a transfer requires a destination account");
+            }
+            if (destinationAccountId === props.accountId) {
+                throw new InvalidTransferError("source and destination accounts must be different");
+            }
+            if (props.category != null) {
+                throw new InvalidTransferError("a transfer cannot have a category");
+            }
+        } else if (destinationAccountId !== null) {
+            throw new InvalidTransferError("only transfers can have a destination account");
+        }
+
         return new Movement({
             id: props.id,
             accountId: props.accountId,
+            destinationAccountId,
             type: props.type,
             amount: Money.fromCents(props.amountInCents),
             category: props.category ?? null,

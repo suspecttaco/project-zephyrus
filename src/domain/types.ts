@@ -6,7 +6,7 @@ import type {
     LoanStatus,
     ShoppingListStatus,
     InvestmentStatus,
-} from "./enums.ts"
+} from "./enums.ts";
 
 // Core
 export interface User {
@@ -31,6 +31,7 @@ export interface Account {
 export interface Movement {
     id: string;
     accountId: string;
+    destinationAccountId: string | null;
     type: MovementType;
     amount: number;
     category: MovementCategory | null;
@@ -77,6 +78,7 @@ export interface InstallmentPurchase {
     totalAmount: number;
     totalInstallments: number;
     paidInstallments: number;
+    advancedInstallments: number;
     monthlyPayment: number;
     active: boolean;
     startDate: string;

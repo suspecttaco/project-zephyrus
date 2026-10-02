@@ -29,6 +29,6 @@ export function createCsvTransform() {
                 .join(",");
 
             callback(null, `${row}\n`);
-        }
+        },
     });
 }

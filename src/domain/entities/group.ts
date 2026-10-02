@@ -6,12 +6,7 @@ export class Group {
     readonly createdBy: string;
     readonly createdAt: Date;
 
-    private constructor(props: {
-        id: string;
-        name: string;
-        createdBy: string;
-        createdAt: Date;
-    }) {
+    private constructor(props: { id: string; name: string; createdBy: string; createdAt: Date }) {
         this.id = props.id;
         this.groupName = props.name;
         this.createdBy = props.createdBy;
@@ -29,11 +24,7 @@ export class Group {
         this.groupName = newName.trim();
     }
 
-    static create(props: {
-        id: string;
-        name: string;
-        createdBy: string;
-    }): Group {
+    static create(props: { id: string; name: string; createdBy: string }): Group {
         if (!props.name.trim()) {
             throw new DomainValidationError("group name is required");
         }

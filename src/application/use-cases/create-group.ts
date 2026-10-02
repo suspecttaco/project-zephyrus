@@ -16,7 +16,11 @@ export class CreateGroup {
         await this.groupRepository.save(group);
 
         // el creador entra como admin
-        const membership = new GroupMembership({ groupId: group.id, userId: input.createdBy, role: GroupRole.GROUP_ADMIN });
+        const membership = new GroupMembership({
+            groupId: group.id,
+            userId: input.createdBy,
+            role: GroupRole.GROUP_ADMIN,
+        });
         await this.membershipRepository.save(membership);
 
         return group;

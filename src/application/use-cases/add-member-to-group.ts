@@ -11,7 +11,9 @@ export class AddMemberToGroup {
         if (existing) throw new DuplicateGroupMembershipError("user already belongs to this group");
 
         const membership = new GroupMembership({
-            groupId: input.groupId, userId: input.userId, role: input.role ?? GroupRole.MEMBER,
+            groupId: input.groupId,
+            userId: input.userId,
+            role: input.role ?? GroupRole.MEMBER,
         });
         await this.membershipRepository.save(membership);
         return membership;

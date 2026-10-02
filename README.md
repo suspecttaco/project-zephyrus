@@ -43,7 +43,7 @@ src/
 - **Errors:** DomainError hierarchy (NegativeBalanceError, CreditLimitExceededError, etc.)
 - **Repository interfaces:** 10 abstract ports (IUserRepository, IAccountRepository, etc.)
 
-### Application layer (23 use cases)
+### Application layer (24 use cases)
 
 - **Auth:** RegisterUser, LoginUser
 - **Accounts:** CreateAccount, RegisterMovement, GetAccountSummary
@@ -51,7 +51,7 @@ src/
   CreateSharedExpense, CalculateGroupBalance, GetGroupLedger
 - **Debt simplification:** SimplifyDebts
 - **Guards:** requireGroupAdmin (only group admins edit the group, remove members or create investments)
-- **Installments:** CreateInstallmentPurchase, PayInstallment
+- **Installments:** CreateInstallmentPurchase, PayInstallment, AdvanceInstallments
 - **Loans:** RegisterLoan, LiquidateLoan
 - **Shopping lists:** CreateShoppingList, MarkItemPurchased
 - **Budgets:** CreateBudget
@@ -61,14 +61,14 @@ src/
 
 ## Scripts
 
-| Command | Description |
-|---|---|
-| `npm run dev` | Start dev server with hot reload (tsx) |
-| `npm run build` | Compile TypeScript to `dist/` |
-| `npm start` | Run compiled server |
-| `npm run typecheck` | Type-check without emitting |
-| `npm run cluster` | Start with cluster mode |
-| `npm run loadtest` | Run autocannon load test |
+| Command             | Description                            |
+| ------------------- | -------------------------------------- |
+| `npm run dev`       | Start dev server with hot reload (tsx) |
+| `npm run build`     | Compile TypeScript to `dist/`          |
+| `npm start`         | Run compiled server                    |
+| `npm run typecheck` | Type-check without emitting            |
+| `npm run cluster`   | Start with cluster mode                |
+| `npm run loadtest`  | Run autocannon load test               |
 
 ## Project status
 

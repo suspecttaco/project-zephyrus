@@ -16,6 +16,7 @@ export class InvalidBudgetPeriodError extends DomainError {}
 export class UnauthorizedGroupActionError extends DomainError {}
 export class NotFoundError extends DomainError {}
 export class DomainValidationError extends DomainError {}
+export class InvalidTransferError extends DomainError {}
 export class InvalidSharedExpenseError extends DomainError {}
 export class EmailAlreadyRegisteredError extends DomainError {}
 export class InvalidCredentialsError extends DomainError {}
