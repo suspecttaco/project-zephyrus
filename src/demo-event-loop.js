@@ -8,4 +8,4 @@ while (Date.now() < fin) {
     // Bloqueo de hilo intencional
 }
 
-console.log("end")
+console.log("end");

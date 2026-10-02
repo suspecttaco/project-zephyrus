@@ -5,7 +5,6 @@ import type { IGroupMembershipRepository } from "../../domain/repositories/group
 import { requireGroupAdmin } from "../guards/require-group-admin.js";
 
 export class UpdateGroup {
-
     constructor(
         private readonly groupRepository: IGroupRepository,
         private readonly membershipRepository: IGroupMembershipRepository,
@@ -21,5 +20,4 @@ export class UpdateGroup {
         await this.groupRepository.save(group);
         return group;
     }
-
 }

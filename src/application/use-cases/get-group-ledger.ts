@@ -40,8 +40,6 @@ export class GetGroupLedger {
             involvedUserIds: [l.lenderId, l.borrowerId],
         }));
 
-        return [...expenseEntries, ...loanEntries].sort(
-            (a, b) => b.date.getTime() - a.date.getTime(),
-        );
+        return [...expenseEntries, ...loanEntries].sort((a, b) => b.date.getTime() - a.date.getTime());
     }
 }

@@ -19,9 +19,14 @@ export class Investment {
     readonly date: Date;
 
     private constructor(props: {
-        id: string; groupId: string; name: string; invested: Money;
-        contributions: InvestmentContribution[]; expectedReturn: number | null;
-        status: InvestmentStatus; date: Date;
+        id: string;
+        groupId: string;
+        name: string;
+        invested: Money;
+        contributions: InvestmentContribution[];
+        expectedReturn: number | null;
+        status: InvestmentStatus;
+        date: Date;
     }) {
         this.id = props.id;
         this.groupId = props.groupId;
@@ -35,9 +40,14 @@ export class Investment {
 
     static create(props: { id: string; groupId: string; name: string; expectedReturn?: number | null }): Investment {
         return new Investment({
-            id: props.id, groupId: props.groupId, name: props.name,
-            invested: Money.zero(), contributions: [],
-            expectedReturn: props.expectedReturn ?? null, status: InvestmentStatus.ACTIVE, date: new Date(),
+            id: props.id,
+            groupId: props.groupId,
+            name: props.name,
+            invested: Money.zero(),
+            contributions: [],
+            expectedReturn: props.expectedReturn ?? null,
+            status: InvestmentStatus.ACTIVE,
+            date: new Date(),
         });
     }
 

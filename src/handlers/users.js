@@ -32,7 +32,7 @@ export function createUser(data) {
     const errors = validateUser(data);
 
     if (errors.length > 0) {
-        return { error: errors};
+        return { error: errors };
     }
 
     const user = {

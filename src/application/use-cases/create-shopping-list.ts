@@ -5,11 +5,7 @@ import type { IShoppingListRepository } from "../../domain/repositories/shopping
 export class CreateShoppingList {
     constructor(private readonly shoppingListRepository: IShoppingListRepository) {}
 
-    async execute(input: {
-        groupId: string;
-        name: string;
-        createdBy: string;
-    }): Promise<ShoppingList> {
+    async execute(input: { groupId: string; name: string; createdBy: string }): Promise<ShoppingList> {
         const list = ShoppingList.create({
             id: randomUUID(),
             ...input,

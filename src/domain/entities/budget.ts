@@ -13,8 +13,14 @@ export class Budget {
     readonly createdAt: Date;
 
     private constructor(props: {
-        id: string; groupId: string | null; userId: string | null; category: MovementCategory;
-        limitAmount: Money; periodStart: Date; periodEnd: Date; createdAt: Date;
+        id: string;
+        groupId: string | null;
+        userId: string | null;
+        category: MovementCategory;
+        limitAmount: Money;
+        periodStart: Date;
+        periodEnd: Date;
+        createdAt: Date;
     }) {
         this.id = props.id;
         this.groupId = props.groupId;
@@ -27,8 +33,13 @@ export class Budget {
     }
 
     static create(props: {
-        id: string; groupId?: string | null; userId?: string | null; category: MovementCategory;
-        limitAmountInCents: number; periodStart: Date; periodEnd: Date;
+        id: string;
+        groupId?: string | null;
+        userId?: string | null;
+        category: MovementCategory;
+        limitAmountInCents: number;
+        periodStart: Date;
+        periodEnd: Date;
     }): Budget {
         if (props.periodEnd <= props.periodStart) {
             throw new InvalidBudgetPeriodError("periodEnd must be after periodStart");
@@ -37,9 +48,14 @@ export class Budget {
             throw new InvalidBudgetPeriodError("limitAmount must be greater than zero");
         }
         return new Budget({
-            id: props.id, groupId: props.groupId ?? null, userId: props.userId ?? null,
-            category: props.category, limitAmount: Money.fromCents(props.limitAmountInCents),
-            periodStart: props.periodStart, periodEnd: props.periodEnd, createdAt: new Date(),
+            id: props.id,
+            groupId: props.groupId ?? null,
+            userId: props.userId ?? null,
+            category: props.category,
+            limitAmount: Money.fromCents(props.limitAmountInCents),
+            periodStart: props.periodStart,
+            periodEnd: props.periodEnd,
+            createdAt: new Date(),
         });
     }
 }

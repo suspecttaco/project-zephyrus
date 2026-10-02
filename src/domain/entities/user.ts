@@ -8,7 +8,7 @@ export class User {
     readonly name: string;
     readonly createdAt: Date;
 
-    private constructor(props: { id: string; email: Email; passwordHash: string; name: string; createdAt: Date}) {
+    private constructor(props: { id: string; email: Email; passwordHash: string; name: string; createdAt: Date }) {
         this.id = props.id;
         this.email = props.email;
         this.passwordHash = props.passwordHash;
@@ -16,7 +16,7 @@ export class User {
         this.createdAt = props.createdAt;
     }
 
-    static create(props: { id: string; email: string; passwordHash: string; name: string; }): User {
+    static create(props: { id: string; email: string; passwordHash: string; name: string }): User {
         if (!props.name.trim()) {
             throw new DomainValidationError("name is required");
         }
@@ -26,7 +26,7 @@ export class User {
             email: Email.create(props.email),
             passwordHash: props.passwordHash,
             name: props.name.trim(),
-            createdAt: new Date()
+            createdAt: new Date(),
         });
     }
 }

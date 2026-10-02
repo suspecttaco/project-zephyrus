@@ -10,8 +10,14 @@ export interface SimplifiedPayment {
 }
 
 export function simplifyDebts(nets: PersonNet[]): SimplifiedPayment[] {
-    const creditors = nets.filter((n) => n.net > 0).map((n) => ({ ...n })).sort((a, b) => b.net - a.net);
-    const debtors = nets.filter((n) => n.net < 0).map((n) => ({ ...n, net: -n.net })).sort((a, b) => b.net - a.net);
+    const creditors = nets
+        .filter((n) => n.net > 0)
+        .map((n) => ({ ...n }))
+        .sort((a, b) => b.net - a.net);
+    const debtors = nets
+        .filter((n) => n.net < 0)
+        .map((n) => ({ ...n, net: -n.net }))
+        .sort((a, b) => b.net - a.net);
 
     const payments: SimplifiedPayment[] = [];
     let i = 0;

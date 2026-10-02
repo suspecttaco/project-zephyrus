@@ -15,9 +15,17 @@ export class InstallmentPurchase {
     readonly createdAt: Date;
 
     private constructor(props: {
-        id: string; accountId: string; description: string; totalAmount: Money;
-        totalInstallments: number; paidInstallments: number; advancedInstallments: number; monthlyPayment: Money;
-        active: boolean; startDate: Date; createdAt: Date;
+        id: string;
+        accountId: string;
+        description: string;
+        totalAmount: Money;
+        totalInstallments: number;
+        paidInstallments: number;
+        advancedInstallments: number;
+        monthlyPayment: Money;
+        active: boolean;
+        startDate: Date;
+        createdAt: Date;
     }) {
         this.id = props.id;
         this.accountId = props.accountId;
@@ -33,13 +41,19 @@ export class InstallmentPurchase {
     }
 
     static create(props: {
-        id: string; accountId: string; description: string;
-        totalAmountInCents: number; totalInstallments: number; monthlyPaymentInCents: number;
+        id: string;
+        accountId: string;
+        description: string;
+        totalAmountInCents: number;
+        totalInstallments: number;
+        monthlyPaymentInCents: number;
     }): InstallmentPurchase {
         if (props.totalInstallments <= 0) throw new InvalidInstallmentPurchaseError("totalInstallments must be > 0");
         if (props.monthlyPaymentInCents <= 0) throw new InvalidInstallmentPurchaseError("monthlyPayment must be > 0");
         return new InstallmentPurchase({
-            id: props.id, accountId: props.accountId, description: props.description,
+            id: props.id,
+            accountId: props.accountId,
+            description: props.description,
             totalAmount: Money.fromCents(props.totalAmountInCents),
             totalInstallments: props.totalInstallments,
             paidInstallments: 0,

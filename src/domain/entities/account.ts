@@ -1,6 +1,11 @@
-import {Money} from "../value-objects/money.js";
-import {AccountType, MovementType} from "../enums.js";
-import {DomainValidationError, CreditLimitExceededError, InvalidTransferError, NegativeBalanceError} from "../errors.js";
+import { Money } from "../value-objects/money.js";
+import { AccountType, MovementType } from "../enums.js";
+import {
+    DomainValidationError,
+    CreditLimitExceededError,
+    InvalidTransferError,
+    NegativeBalanceError,
+} from "../errors.js";
 
 export class Account {
     readonly id: string;
@@ -49,7 +54,10 @@ export class Account {
             throw new DomainValidationError("only credit accounts can have a creditLimit");
         }
 
-        if (props.cutOffDay != null && (!Number.isInteger(props.cutOffDay) || props.cutOffDay < 1 || props.cutOffDay > 31)) {
+        if (
+            props.cutOffDay != null &&
+            (!Number.isInteger(props.cutOffDay) || props.cutOffDay < 1 || props.cutOffDay > 31)
+        ) {
             throw new DomainValidationError("cutOffDay must be an integer between 1 and 31");
         }
 

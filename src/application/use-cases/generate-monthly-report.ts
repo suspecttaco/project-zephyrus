@@ -1,7 +1,7 @@
-import type {IMovementRepository} from "../../domain/repositories/movement-repository.js";
-import type {IAccountRepository} from "../../domain/repositories/account-repository.js";
-import type {ISharedExpenseRepository} from "../../domain/repositories/shared-expense-repository.js";
-import {MovementType} from "../../domain/enums.js";
+import type { IMovementRepository } from "../../domain/repositories/movement-repository.js";
+import type { IAccountRepository } from "../../domain/repositories/account-repository.js";
+import type { ISharedExpenseRepository } from "../../domain/repositories/shared-expense-repository.js";
+import { MovementType } from "../../domain/enums.js";
 
 export interface MonthlyReport {
     month: string;
@@ -31,12 +31,8 @@ export class GenerateMonthlyReport {
         const accounts = await this.accountRepository.findByUser(input.userId);
         const accountIds = accounts.map((a) => a.id);
 
-        const movements = await Promise.all(
-            accountIds.map((id) => this.movementRepository.findByAccount(id)),
-        );
-        const allMovements = movements.flat().filter(
-            (m) => m.date >= startDate && m.date <= endDate,
-        );
+        const movements = await Promise.all(accountIds.map((id) => this.movementRepository.findByAccount(id)));
+        const allMovements = movements.flat().filter((m) => m.date >= startDate && m.date <= endDate);
 
         let totalIncomeInCents = 0;
         let totalExpensesInCents = 0;
@@ -58,7 +54,11 @@ export class GenerateMonthlyReport {
 
             const account = accounts.find((a) => a.id === m.accountId);
             if (account) {
-                const entry = byAccount.get(account.id) ?? { accountId: account.id, name: account.name, totalInCents: 0 };
+                const entry = byAccount.get(account.id) ?? {
+                    accountId: account.id,
+                    name: account.name,
+                    totalInCents: 0,
+                };
                 entry.totalInCents += m.amount.amountInCents;
                 byAccount.set(account.id, entry);
             }
@@ -73,13 +73,11 @@ export class GenerateMonthlyReport {
             }
 
             return entry;
-        }
+        };
 
         if (input.groupId) {
             const expenses = await this.sharedExpenseRepository.findByGroup(input.groupId);
-            const filteredExpenses = expenses.filter(
-                (e) => e.date >= startDate && e.date <= endDate,
-            );
+            const filteredExpenses = expenses.filter((e) => e.date >= startDate && e.date <= endDate);
 
             for (const e of filteredExpenses) {
                 personEntry(e.paidBy).paidInCents += e.amount.amountInCents;

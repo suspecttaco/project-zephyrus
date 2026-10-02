@@ -14,7 +14,7 @@ export class Movement {
     readonly createdAt: Date;
 
     private constructor(props: {
-        id: string,
+        id: string;
         accountId: string;
         destinationAccountId: string | null;
         type: MovementType;

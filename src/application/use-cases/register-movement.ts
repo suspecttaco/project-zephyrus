@@ -13,8 +13,11 @@ export class RegisterMovement {
     ) {}
 
     async execute(input: {
-        accountId: string; type: MovementType; amountInCents: number;
-        category?: MovementCategory; description: string;
+        accountId: string;
+        type: MovementType;
+        amountInCents: number;
+        category?: MovementCategory;
+        description: string;
         destinationAccountId?: string; // obligatorio solo si type = TRANSFER
     }): Promise<Movement> {
         const account = await this.accountRepository.findById(input.accountId);

@@ -4,7 +4,7 @@ import tseslint from "typescript-eslint";
 import eslintConfigPrettier from "eslint-config-prettier";
 
 export default tseslint.config(
-    { ignores: ["dist/", "coverage/", "node_modules/", "notes/", "scripts/"]},
+    { ignores: ["dist/", "coverage/", "node_modules/", "notes/", "scripts/"] },
     eslint.configs.recommended,
     ...tseslint.configs.strictTypeChecked,
     ...tseslint.configs.stylisticTypeChecked,

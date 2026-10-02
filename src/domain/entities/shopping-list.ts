@@ -10,8 +10,12 @@ export class ShoppingList {
     readonly createdAt: Date;
 
     private constructor(props: {
-        id: string; groupId: string; name: string; createdBy: string;
-        status: ShoppingListStatus; createdAt: Date;
+        id: string;
+        groupId: string;
+        name: string;
+        createdBy: string;
+        status: ShoppingListStatus;
+        createdAt: Date;
     }) {
         this.id = props.id;
         this.groupId = props.groupId;

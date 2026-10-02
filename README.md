@@ -61,14 +61,14 @@ src/
 
 ## Scripts
 
-| Command | Description |
-|---|---|
-| `npm run dev` | Start dev server with hot reload (tsx) |
-| `npm run build` | Compile TypeScript to `dist/` |
-| `npm start` | Run compiled server |
-| `npm run typecheck` | Type-check without emitting |
-| `npm run cluster` | Start with cluster mode |
-| `npm run loadtest` | Run autocannon load test |
+| Command             | Description                            |
+| ------------------- | -------------------------------------- |
+| `npm run dev`       | Start dev server with hot reload (tsx) |
+| `npm run build`     | Compile TypeScript to `dist/`          |
+| `npm start`         | Run compiled server                    |
+| `npm run typecheck` | Type-check without emitting            |
+| `npm run cluster`   | Start with cluster mode                |
+| `npm run loadtest`  | Run autocannon load test               |
 
 ## Project status
 

@@ -68,7 +68,7 @@ export class SharedExpense {
         const splitTotal = split.reduce((sum, s) => sum.add(s.assignedAmount), Money.zero());
         if (!splitTotal.equals(amount)) {
             throw new ExpenseSplitMismatchError(
-                `split total (${splitTotal.toString()}) does not match expense amount (${amount.toString()})`
+                `split total (${splitTotal.toString()}) does not match expense amount (${amount.toString()})`,
             );
         }
 

@@ -6,7 +6,7 @@ import type {
     LoanStatus,
     ShoppingListStatus,
     InvestmentStatus,
-} from "./enums.ts"
+} from "./enums.ts";
 
 // Core
 export interface User {
