@@ -5,6 +5,7 @@ import {
     CreditLimitExceededError,
     InvalidTransferError,
     NegativeBalanceError,
+    BusinessConflictError,
 } from "../errors.js";
 
 export class Account {
@@ -80,6 +81,71 @@ export class Account {
     get availableCredit(): Money | null {
         if (this.type !== AccountType.CREDIT || !this.creditLimit) return null;
         return this.creditLimit.subtract(this.balance);
+    }
+
+    clone(): Account {
+        return new Account({
+            id: this.id,
+            userId: this.userId,
+            name: this.name,
+            type: this.type,
+            balance: this.balance,
+            creditLimit: this.creditLimit,
+            cutOffDay: this.cutOffDay,
+            createdAt: new Date(this.createdAt.getTime()),
+        });
+    }
+
+    update(changes: { name: string; creditLimitInCents?: number | null; cutOffDay?: number | null }): Account {
+        if (typeof changes.name !== "string" || changes.name.trim().length === 0) {
+            throw new DomainValidationError("account name must be a non-empty string");
+        }
+
+        let creditLimit = this.creditLimit;
+        if (changes.creditLimitInCents !== undefined) {
+            if (this.type !== AccountType.CREDIT) {
+                if (changes.creditLimitInCents !== null) {
+                    throw new BusinessConflictError("credit limit only applies to credit accounts");
+                }
+                creditLimit = null;
+            } else {
+                const cents = changes.creditLimitInCents;
+                if (cents === null) {
+                    throw new DomainValidationError("credit accounts require a credit limit");
+                }
+                if (!Number.isInteger(cents) || cents <= 0) {
+                    throw new DomainValidationError("creditLimitInCents must be a positive integer");
+                }
+                const nextLimit = Money.fromCents(cents);
+                if (this.balance.isGreaterThan(nextLimit)) {
+                    throw new BusinessConflictError("credit limit cannot be lower than the debt already used");
+                }
+                creditLimit = nextLimit;
+            }
+        }
+
+        let cutOffDay = this.cutOffDay;
+        if (changes.cutOffDay !== undefined) {
+            if (changes.cutOffDay === null) {
+                cutOffDay = null;
+            } else {
+                if (!Number.isInteger(changes.cutOffDay) || changes.cutOffDay < 1 || changes.cutOffDay > 31) {
+                    throw new DomainValidationError("cutOffDay must be an integer between 1 and 31");
+                }
+                cutOffDay = changes.cutOffDay;
+            }
+        }
+
+        return new Account({
+            id: this.id,
+            userId: this.userId,
+            name: changes.name,
+            type: this.type,
+            balance: this.balance,
+            creditLimit,
+            cutOffDay,
+            createdAt: new Date(this.createdAt.getTime()),
+        });
     }
 
     applyMovement(type: MovementType, amount: Money): void {

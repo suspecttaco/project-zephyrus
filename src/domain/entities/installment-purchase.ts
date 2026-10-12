@@ -7,8 +7,8 @@ export class InstallmentPurchase {
     readonly description: string;
     readonly totalAmount: Money;
     readonly totalInstallments: number;
-    private paidInstallments: number;
-    private advancedInstallments: number;
+    private _paidInstallments: number;
+    private _advancedInstallments: number;
     readonly monthlyPayment: Money;
     private active: boolean;
     readonly startDate: Date;
@@ -32,8 +32,8 @@ export class InstallmentPurchase {
         this.description = props.description;
         this.totalAmount = props.totalAmount;
         this.totalInstallments = props.totalInstallments;
-        this.paidInstallments = props.paidInstallments;
-        this.advancedInstallments = props.advancedInstallments;
+        this._paidInstallments = props.paidInstallments;
+        this._advancedInstallments = props.advancedInstallments;
         this.monthlyPayment = props.monthlyPayment;
         this.active = props.active;
         this.startDate = props.startDate;
@@ -66,7 +66,7 @@ export class InstallmentPurchase {
     }
 
     get remainingInstallments(): number {
-        return this.totalInstallments - this.paidInstallments - this.advancedInstallments;
+        return this.totalInstallments - this._paidInstallments - this._advancedInstallments;
     }
 
     get remainingDebt(): Money {
@@ -78,7 +78,38 @@ export class InstallmentPurchase {
     }
 
     get prepaidInstallments(): number {
-        return this.advancedInstallments;
+        return this._advancedInstallments;
+    }
+
+    get paidInstallments(): number {
+        return this._paidInstallments;
+    }
+
+    get advancedInstallments(): number {
+        return this._advancedInstallments;
+    }
+
+    clone(): InstallmentPurchase {
+        return new InstallmentPurchase({
+            id: this.id,
+            accountId: this.accountId,
+            description: this.description,
+            totalAmount: this.totalAmount,
+            totalInstallments: this.totalInstallments,
+            paidInstallments: this._paidInstallments,
+            advancedInstallments: this._advancedInstallments,
+            monthlyPayment: this.monthlyPayment,
+            active: this.active,
+            startDate: new Date(this.startDate.getTime()),
+            createdAt: new Date(this.createdAt.getTime()),
+        });
+    }
+
+    cancel(): void {
+        if (!this.active) {
+            throw new InvalidInstallmentPurchaseError("purchase is already cancelled");
+        }
+        this.active = false;
     }
 
     assertCanPayInstallment(): void {
@@ -91,7 +122,7 @@ export class InstallmentPurchase {
     // Paga la mensualidad del mes: avanza el contador "X/N"
     payInstallment(): void {
         this.assertCanPayInstallment();
-        this.paidInstallments += 1;
+        this._paidInstallments += 1;
         if (this.remainingInstallments === 0) this.active = false;
     }
 
@@ -111,7 +142,7 @@ export class InstallmentPurchase {
     // El pago del mes y el calendario proximo no cambian el plan solo termina antes
     advanceInstallments(count: number): void {
         this.assertCanAdvance(count);
-        this.advancedInstallments += count;
+        this._advancedInstallments += count;
         if (this.remainingInstallments === 0) this.active = false;
     }
 }

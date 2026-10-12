@@ -20,3 +20,4 @@ export class InvalidTransferError extends DomainError {}
 export class InvalidSharedExpenseError extends DomainError {}
 export class EmailAlreadyRegisteredError extends DomainError {}
 export class InvalidCredentialsError extends DomainError {}
+export class BusinessConflictError extends DomainError {}
