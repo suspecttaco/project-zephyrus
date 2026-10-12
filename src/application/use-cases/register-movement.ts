@@ -5,6 +5,7 @@ import { MovementType } from "../../domain/enums.js";
 import type { MovementCategory } from "../../domain/enums.js";
 import type { IMovementRepository } from "../../domain/repositories/movement-repository.js";
 import type { IAccountRepository } from "../../domain/repositories/account-repository.js";
+import type { RequestContext } from "../request-context.js";
 
 export class RegisterMovement {
     constructor(
@@ -19,9 +20,14 @@ export class RegisterMovement {
         category?: MovementCategory;
         description: string;
         destinationAccountId?: string; // obligatorio solo si type = TRANSFER
+        date?: Date;
+        context?: RequestContext;
     }): Promise<Movement> {
         const account = await this.accountRepository.findById(input.accountId);
         if (!account) throw new NotFoundError("account not found");
+        if (input.context && account.userId !== input.context.ownerUserId) {
+            throw new NotFoundError("account not found");
+        }
 
         const movement = Movement.create({ id: randomUUID(), ...input });
 
@@ -37,6 +43,9 @@ export class RegisterMovement {
         const destination = await this.accountRepository.findById(movement.destinationAccountId);
         if (!destination) throw new NotFoundError("destination account not found");
         if (destination.userId !== account.userId) {
+            if (input.context) {
+                throw new NotFoundError("destination account not found");
+            }
             throw new InvalidTransferError("transfers are only allowed between accounts of the same user");
         }
 

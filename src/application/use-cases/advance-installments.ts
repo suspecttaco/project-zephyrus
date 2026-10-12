@@ -28,6 +28,7 @@ export class AdvanceInstallments {
             type: MovementType.EXPENSE,
             amountInCents: purchase.monthlyPayment.multiply(input.count).amountInCents,
             description: `Advance of ${String(input.count)} installment(s): ${purchase.description}`,
+            installmentPurchaseId: purchase.id,
         });
 
         account.applyMovement(MovementType.EXPENSE, movement.amount);
