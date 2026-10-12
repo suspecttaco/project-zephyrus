@@ -12,6 +12,7 @@ export class Movement {
     readonly description: string;
     readonly date: Date;
     readonly createdAt: Date;
+    readonly installmentPurchaseId: string | null;
 
     private constructor(props: {
         id: string;
@@ -23,6 +24,7 @@ export class Movement {
         description: string;
         date: Date;
         createdAt: Date;
+        installmentPurchaseId: string | null;
     }) {
         this.id = props.id;
         this.accountId = props.accountId;
@@ -33,6 +35,7 @@ export class Movement {
         this.description = props.description;
         this.date = props.date;
         this.createdAt = props.createdAt;
+        this.installmentPurchaseId = props.installmentPurchaseId;
     }
 
     static create(props: {
@@ -44,6 +47,8 @@ export class Movement {
         category?: MovementCategory | null;
         description: string;
         date?: Date;
+        createdAt?: Date;
+        installmentPurchaseId?: string | null;
     }): Movement {
         if (props.amountInCents <= 0) {
             throw new InvalidMovementAmountError("movement amount must be greater than zero");
@@ -77,7 +82,12 @@ export class Movement {
             category: props.category ?? null,
             description: props.description,
             date: props.date ?? new Date(),
-            createdAt: new Date(),
+            createdAt: props.createdAt ?? new Date(),
+            installmentPurchaseId: props.installmentPurchaseId ?? null,
         });
+    }
+
+    static oppositeType(type: MovementType): MovementType {
+        return type === MovementType.EXPENSE ? MovementType.INCOME : MovementType.EXPENSE;
     }
 }

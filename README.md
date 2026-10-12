@@ -28,9 +28,32 @@ Clean Architecture with 4 layers:
 ```
 src/
 ├── domain/            # Entities, value objects, enums, errors, repository interfaces
-├── application/       # Use cases with dependency injection
-├── infrastructure/    # (pending) TypeORM, Redis, logger, Argon2, JWT, WebSockets
-└── presentation/      # (pending) Express routers, controllers, middlewares, Zod, Swagger
+├── application/       # Use cases with dependency injection, request context, unit of work
+├── infrastructure/
+│   └── memory/        # In-memory adapters + snapshot unit of work (PostgreSQL planned, week 10)
+└── presentation/      # Express app, routes, controllers, serializers, validation
+```
+
+### Container diagram (C4 level 2)
+
+State implemented in week 7: the local client calls a single Express API container; inside,
+HTTP adapters (routes and controllers) invoke the use cases, which reach the repository ports
+backed by in-memory adapters, isolated per app instance. PostgreSQL is **planned for week 10**
+and does not take part in the current boot.
+
+```mermaid
+C4Container
+    title Project Zephyrus — contenedores (semana 7)
+    Person(cliente, "Cliente local", "Postman o navegador; HTTP contra http://localhost:3000")
+    Container_Boundary(api, "API Express (Node.js + TypeScript)") {
+        Container(http, "Adaptadores HTTP", "src/presentation", "Rutas y controllers REST /api/* con helmet, cors, compression y express.json")
+        Container(usecases, "Casos de uso", "src/application", "CRUD de cuentas y movimientos, MSI, cancelación de compra")
+        ContainerDb(memory, "Repositorios en memoria", "src/infrastructure/memory", "Almacenes aislados por app + UnitOfWork con snapshot/rollback")
+    }
+    ContainerDb_Ext(postgres, "PostgreSQL", "semana 10 (planeado)", "Persistencia futura; el arranque actual no la usa")
+    Rel(cliente, http, "HTTP/JSON")
+    Rel(http, usecases, "invoca")
+    Rel(usecases, memory, "puertos IAccountRepository / IMovementRepository / IInstallmentPurchaseRepository")
 ```
 
 ### Domain layer
@@ -43,21 +66,31 @@ src/
 - **Errors:** DomainError hierarchy (NegativeBalanceError, CreditLimitExceededError, etc.)
 - **Repository interfaces:** 10 abstract ports (IUserRepository, IAccountRepository, etc.)
 
-### Application layer (24 use cases)
+### Application layer (32 use cases)
 
 - **Auth:** RegisterUser, LoginUser
-- **Accounts:** CreateAccount, RegisterMovement, GetAccountSummary
+- **Accounts:** CreateAccount, ListAccounts, GetAccount, UpdateAccount, DeleteAccount,
+  RegisterMovement, ListAccountMovements, GetMovement, UpdateMovement, DeleteMovement,
+  GetAccountSummary
 - **Groups:** CreateGroup, AddMemberToGroup, RemoveMemberFromGroup, UpdateGroup,
   CreateSharedExpense, CalculateGroupBalance, GetGroupLedger
 - **Debt simplification:** SimplifyDebts
 - **Guards:** requireGroupAdmin (only group admins edit the group, remove members or create investments)
-- **Installments:** CreateInstallmentPurchase, PayInstallment, AdvanceInstallments
+- **Installments:** CreateInstallmentPurchase, PayInstallment, AdvanceInstallments,
+  CancelInstallmentPurchase
 - **Loans:** RegisterLoan, LiquidateLoan
 - **Shopping lists:** CreateShoppingList, MarkItemPurchased
 - **Budgets:** CreateBudget
 - **Investments:** CreateInvestment, RegisterContribution
 - **Reports:** GenerateMonthlyReport
-- **Debt simplification:** SimplifyDebts
+
+### Demo limitations
+
+- **Legacy seed CSV:** `GET /api/movements/export` still streams the fixed seed CSV from
+  earlier weeks; it does not reflect the accounts and movements created through the new CRUD
+  endpoints (demo limitation until reports read real data).
+- **Fixed demo user:** every write belongs to the local fixture user; there is no
+  authentication yet (JWT/RBAC arrives in week 11).
 
 ## Scripts
 
@@ -77,8 +110,8 @@ src/
 - [x] Week 3 — Streams, buffers, cluster, graceful shutdown
 - [x] Week 4 — TypeScript strict, domain types
 - [x] Week 5 — Clean Architecture, rich entities, value objects, use cases
-- [ ] Week 6 — Linters, Prettier, Git hooks
-- [ ] Week 7 — Express REST API
+- [x] Week 6 — Linters, Prettier, Git hooks
+- [x] Week 7 — Express REST API
 - [ ] Week 8 — Zod validation, Winston logging
 - [ ] Week 9 — Swagger, HATEOAS
 - [ ] Week 10 — PostgreSQL, TypeORM, Docker

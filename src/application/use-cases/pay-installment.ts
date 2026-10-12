@@ -28,6 +28,7 @@ export class PayInstallment {
             type: MovementType.EXPENSE,
             amountInCents: purchase.monthlyPayment.amountInCents,
             description: `Installment payment: ${purchase.description}`,
+            installmentPurchaseId: purchase.id,
         });
 
         account.applyMovement(MovementType.EXPENSE, movement.amount);
