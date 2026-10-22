@@ -1,0 +1,12 @@
+{
+    "require": [
+        "ts-node/register",
+        "tests/helpers/setup.ts"
+    ],
+    "spec": "tests/**/*.test.ts",
+    "timeout": 10000,
+    "exit": true,
+    "ignore": [
+        "tests/integration/**"
+    ]
+}
