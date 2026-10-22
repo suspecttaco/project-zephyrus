@@ -1,0 +1,6 @@
+{
+    "require": ["tests/integration/env.ts", "ts-node/register", "tests/integration/hooks.ts"],
+    "spec": "tests/integration/**/*.test.ts",
+    "timeout": 60000,
+    "exit": true
+}

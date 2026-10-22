@@ -1,0 +1,29 @@
+.vscode/
+.idea/
+dist/
+node_modules/
+md/
+
+.env
+server_config.json
+
+build/
+binaries/
+*.pem
+coverage/
+.nyc_output/
+
+# Servidor simulado y configuración de producción local
+.env.production
+scripts/docker/ec2-sim/mi_clave_ec2
+scripts/docker/ec2-sim/mi_clave_ec2.pub
+
+# Estado del aprovisionamiento AWS
+scripts/aws/.state
+scripts/aws/*.pem
+
+# Adjuntos locales
+uploads/
+
+# Datos del servicio de actividad
+data/
