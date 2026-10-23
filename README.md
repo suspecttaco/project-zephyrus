@@ -1,4 +1,4 @@
-# Project Zephyrus
+# Sistema de Gestión de Finanzas Personales y Compartidas para Familias y Compañeros de Vivienda
 
 Backend for personal and shared finances aimed at families and roommates: tracks credit/debit
 card and cash expenses, installment purchases, debts between people, and card cut-off date
@@ -43,7 +43,7 @@ and does not take part in the current boot.
 
 ```mermaid
 C4Container
-    title Project Zephyrus — contenedores (semana 7)
+    title Sistema de Gestión de Finanzas Personales y Compartidas para Familias y Compañeros de Vivienda — contenedores (semana 7)
     Person(cliente, "Cliente local", "Postman o navegador; HTTP contra http://localhost:3000")
     Container_Boundary(api, "API Express (Node.js + TypeScript)") {
         Container(http, "Adaptadores HTTP", "src/presentation", "Rutas y controllers REST /api/* con helmet, cors, compression y express.json")

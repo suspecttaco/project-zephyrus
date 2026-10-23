@@ -1,5 +1,5 @@
 {
-  "name": "project-zephyrus",
+  "name": "finanzas-personales-compartidas",
   "version": "1.0.0",
   "description": "Backend for personal and shared finances for families and roommates",
   "main": "dist/server.js",
