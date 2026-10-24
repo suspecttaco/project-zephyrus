@@ -1,0 +1,103 @@
+# Sistema de Gestión de Finanzas Personales y Compartidas para Familias y Compañeros de Vivienda
+
+Requisitos funcionales y no funcionales.
+
+## Requisitos funcionales
+
+- **RF-01** El sistema permite registrar usuarios con un correo electrónico único.
+- **RF-02** El sistema almacena la contraseña de cada usuario de forma segura mediante un hash.
+- **RF-03** El sistema permite iniciar sesión con correo y contraseña, emite un token JWT y rechaza las credenciales inválidas.
+- **RF-04** El sistema valida el token en las rutas protegidas e identifica al usuario de la petición.
+- **RF-05** El sistema permite crear cuentas de débito, crédito y efectivo.
+- **RF-06** El sistema acepta el límite de crédito solo en las cuentas de crédito y el día de corte únicamente entre el 1 y el 31.
+- **RF-07** El sistema permite listar, consultar, editar y eliminar cuentas.
+- **RF-08** El sistema restringe el acceso a cada cuenta a su propietario.
+- **RF-09** El sistema registra ingresos y egresos con categoría, descripción, fecha y monto positivo, y actualiza el saldo de la cuenta.
+- **RF-10** El sistema rechaza los egresos que dejarían negativo el saldo de una cuenta de débito o efectivo, o que excederían el límite de una cuenta de crédito.
+- **RF-11** El sistema permite listar, consultar, editar y eliminar los movimientos de una cuenta.
+- **RF-12** El sistema registra transferencias entre cuentas propias y rechaza las que van a otro usuario o a la misma cuenta.
+- **RF-13** El sistema deja intactas las cuentas de origen y destino cuando una transferencia falla.
+- **RF-14** El sistema registra compras a plazos (MSI) sobre una tarjeta de crédito y lleva el contador de mensualidades pagadas y pendientes junto con la deuda restante.
+- **RF-15** El sistema permite pagar la mensualidad del mes, cargándola como egreso a la tarjeta.
+- **RF-16** El sistema permite adelantar mensualidades y rechaza adelantar cero, una cantidad no entera o más de las que faltan.
+- **RF-17** El sistema deja intactas la cuenta y la compra cuando una operación excede el límite de crédito, y desactiva la compra liquidada sin admitir más pagos.
+- **RF-18** El sistema permite cancelar una compra a plazos.
+- **RF-19** El sistema muestra por cuenta el saldo, el crédito disponible, la deuda total y las próximas parcialidades.
+- **RF-20** El sistema permite crear y editar grupos (familia, compañeros de vivienda).
+- **RF-21** El sistema permite agregar y quitar miembros de un grupo y rechaza agregar a uno que ya pertenece.
+- **RF-22** El sistema asigna a cada membresía el rol de administrador o de miembro, de modo que una persona puede tener roles distintos en grupos distintos.
+- **RF-23** El sistema restringe al administrador la edición del grupo, la baja de miembros y la creación de inversiones.
+- **RF-24** El sistema registra gastos pagados por un miembro y los divide entre los participantes.
+- **RF-25** El sistema exige que el monto del gasto sea positivo y que la división incluya al menos un miembro.
+- **RF-26** El sistema rechaza las divisiones con montos negativos o miembros repetidos, y exige que su suma sea igual al monto del gasto.
+- **RF-27** El sistema calcula el balance neto de cada persona del grupo, incluidos los préstamos entre miembros.
+- **RF-28** El sistema calcula un plan mínimo de pagos que salda las deudas del grupo.
+- **RF-29** El sistema registra las liquidaciones entre miembros para reducir el balance.
+- **RF-30** El sistema registra préstamos o abonos de un miembro a otro dentro del grupo y rechaza los dirigidos a la misma persona.
+- **RF-31** El sistema permite liquidar un préstamo y rechaza liquidarlo dos veces.
+- **RF-32** El sistema muestra los movimientos del grupo solo a sus miembros, sin revelar las cuentas privadas personales.
+- **RF-33** El sistema permite crear listas de compras por grupo y agregarles ítems.
+- **RF-34** El sistema permite marcar un ítem como comprado y registrar su precio.
+- **RF-35** El sistema permite definir presupuestos por categoría y por período válido.
+- **RF-36** El sistema calcula el gasto frente al presupuesto y avisa cuando se excede.
+- **RF-37** El sistema permite al administrador crear inversiones del grupo y registra los aportes de cada miembro.
+- **RF-38** El sistema registra el rendimiento de cada inversión.
+- **RF-39** El sistema genera el reporte mensual con los ingresos y los gastos totales, sin contar las transferencias.
+- **RF-40** El sistema desglosa el reporte mensual por categoría, cuenta y persona, e incluye los abonos y la deuda por tarjeta.
+- **RF-41** El sistema guarda la fecha de corte de cada cuenta, lista los próximos cortes y avisa con anticipación para pagar la tarjeta.
+- **RF-42** El sistema notifica en tiempo real, por WebSockets, los gastos nuevos y los cambios de balance del grupo.
+- **RF-43** El sistema notifica en tiempo real las parcialidades y los presupuestos superados, y envía los eventos solo a los miembros del grupo correspondiente.
+- **RF-44** El sistema valida con Zod el cuerpo, los parámetros de ruta y los parámetros de consulta de las peticiones.
+- **RF-45** El sistema responde 400 con el detalle por campo ante entradas inválidas.
+- **RF-46** El sistema responde los errores con un formato uniforme y traduce los errores de dominio a códigos HTTP concretos.
+- **RF-47** El sistema oculta trazas y secretos en las respuestas de error 5xx.
+- **RF-48** El sistema registra las peticiones y los errores como logs JSON.
+
+## Requisitos no funcionales
+
+- **RNF-01** El código se organiza en cuatro capas: `domain/`, `application/`, `infrastructure/` y `presentation/`.
+- **RNF-02** El dominio no importa librerías externas (Express, TypeORM) y las dependencias entre capas apuntan hacia el dominio.
+- **RNF-03** Los casos de uso acceden a los datos solo mediante interfaces de repositorio.
+- **RNF-04** TypeScript se compila con `strict`, `noImplicitAny` y `strictNullChecks`.
+- **RNF-05** El código no usa `any` sin justificación, define tipos explícitos para entidades y DTOs, y `tsc --noEmit` termina sin errores.
+- **RNF-06** El código pasa ESLint con reglas estrictas y el formato de Prettier sin errores.
+- **RNF-07** Los hooks de Git (Husky y lint-staged) ejecutan las verificaciones antes de cada commit, y los mensajes siguen Conventional Commits.
+- **RNF-08** Los archivos se nombran en `kebab-case`.
+- **RNF-09** El código, las rutas, los campos JSON y los eventos se escriben en inglés, y la documentación en español.
+- **RNF-10** Los comentarios se usan solo para explicar el porqué de una decisión.
+- **RNF-11** El 100 % de las entradas HTTP se valida con esquemas Zod y los DTOs se infieren con `z.infer`.
+- **RNF-12** Los errores HTTP se gestionan en un único middleware con respuesta uniforme.
+- **RNF-13** Los errores 5xx no filtran trazas, mensajes internos ni secretos.
+- **RNF-14** Los logs son JSON estructurado con marca de tiempo ISO, nivel y contexto, y no contienen contraseñas, tokens ni datos sensibles.
+- **RNF-15** Los datos se almacenan en PostgreSQL mediante TypeORM.
+- **RNF-16** El esquema se versiona exclusivamente con migraciones y la sincronización automática (`synchronize`) está desactivada en producción.
+- **RNF-17** Las entidades usan identificadores UUID.
+- **RNF-18** La conexión a la base de datos y el resto de la configuración se definen con variables de entorno, documentadas en un `.env.example` sin secretos.
+- **RNF-19** Las operaciones compuestas críticas se ejecutan en transacciones atómicas que se revierten por completo ante un fallo.
+- **RNF-20** Las transacciones se gestionan mediante un puerto de unidad de trabajo, sin acoplar los casos de uso a TypeORM.
+- **RNF-21** Las contraseñas se almacenan con Argon2id o Bcrypt, con un costo mínimo de 12 rondas.
+- **RNF-22** El algoritmo de hash se abstrae tras una interfaz que permite sustituirlo.
+- **RNF-23** El acceso se autentica con un JWT en la cabecera `Authorization: Bearer`, validado por un middleware.
+- **RNF-24** El acceso a las rutas restringidas se controla por roles (RBAC).
+- **RNF-25** El inicio de sesión cuenta con protección contra ataques de fuerza bruta.
+- **RNF-26** El servidor aplica cabeceras de seguridad con Helmet, CORS con origen configurable y compresión gzip.
+- **RNF-27** Las cuentas privadas no aparecen en las vistas del grupo y los secretos y datos personales no se guardan en el repositorio.
+- **RNF-28** Las consultas de alta lectura (balance, libreta, resúmenes) usan la estrategia Cache-Aside con un TTL en todas las claves.
+- **RNF-29** La caché se invalida ante las operaciones de escritura sobre los datos afectados.
+- **RNF-30** La API sigue respondiendo con datos de PostgreSQL si Redis no está disponible.
+- **RNF-31** El servidor se cierra de forma ordenada ante `SIGTERM` e `SIGINT`, y el proceso se reinicia automáticamente ante fallos.
+- **RNF-32** El sistema cuenta con pruebas unitarias de los casos de uso con repositorios simulados.
+- **RNF-33** El sistema cuenta con pruebas de integración de los endpoints sobre una base de datos efímera.
+- **RNF-34** La cobertura global de la lógica de aplicación es de al menos 70 % en la semana 13 y de al menos 80 % en la entrega final.
+- **RNF-35** El Dockerfile usa varias etapas, genera una imagen final ligera y ejecuta el contenedor con un usuario no privilegiado.
+- **RNF-36** Docker Compose orquesta la aplicación, PostgreSQL con almacenamiento persistente y Redis, todos con healthchecks.
+- **RNF-37** Un flujo de GitHub Actions se ejecuta en cada push y pull request hacia `main` con linter, verificación de tipos, pruebas y construcción de la imagen.
+- **RNF-38** El README muestra la insignia del estado del flujo de integración continua.
+- **RNF-39** El sistema se despliega en una instancia pública de AWS EC2, con grupos de seguridad restringidos y el proceso supervisado por Docker o PM2.
+- **RNF-40** `GET /api/health` responde 200 de forma continua.
+- **RNF-41** El servidor WebSocket atiende en una ruta dedicada y verifica que la conexión esté abierta antes de emitir un evento.
+- **RNF-42** Un heartbeat cada 30 s cierra las conexiones WebSocket inactivas.
+- **RNF-43** La especificación OpenAPI está disponible de forma interactiva en `/api/docs`, con esquemas, códigos de respuesta y autenticación Bearer.
+- **RNF-44** Las respuestas de la API incluyen enlaces HATEOAS.
+- **RNF-45** El repositorio incluye una colección de Postman.
+- **RNF-46** El README incluye un diagrama de arquitectura, la guía de inicio, la guía de pruebas y las URL públicas.
