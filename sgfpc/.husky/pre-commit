@@ -1,1 +1,2 @@
+cd sgfpc
 npx lint-staged

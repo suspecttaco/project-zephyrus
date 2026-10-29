@@ -1,0 +1,3 @@
+msg="$(realpath "$1")"
+cd sgfpc
+npx commitlint --edit "$msg"
